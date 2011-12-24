@@ -10,12 +10,15 @@
 
 globals [
   bullet-speed
+  bullet-travel-distance
+  friction
   last-tick-time
   max-acceleration
-  max-bullet-travel-distance
   max-fps
   max-tank-speed
+  min-acceleration
   player
+  speed-up
   turn-speed
 ]
 
@@ -28,6 +31,7 @@ bullets-own [
 ]
 
 tanks-own [
+  acceleration
   speed
   team
 ]
@@ -52,25 +56,25 @@ end
 to go
   do-tank-physics
   do-bullet-physics
-  do-player-logic
+  render
   keep-time
 end
 
-to player-speed-up
+to player-accelerate
   ask player [
-    set speed speed + max-acceleration
-    if speed > max-tank-speed [
-      set speed max-tank-speed
+    if acceleration < 0 [
+      set acceleration 0
+    ]
+    set acceleration acceleration + speed-up
+    if acceleration > max-acceleration [
+      set acceleration max-acceleration
     ]
   ]
 end
 
-to player-slow-down
+to player-decelerate
   ask player [
-    set speed speed - max-acceleration
-    if speed < 0 [
-      set speed 0
-    ]
+    set acceleration min-acceleration
   ]
 end
 
@@ -98,20 +102,20 @@ end
 
 to setup-defaults
   set bullet-speed 2
-  set max-acceleration 0.05
-  set max-bullet-travel-distance 16
+  set bullet-travel-distance 16
+  set friction 0.01
+  set max-acceleration 0.5
   set max-fps 30
   set max-tank-speed 0.3
-  set player-accel-before-slowdown 15
-  set player-since-last-accel 0
-  set player-slowdown-amount 0.01
+  set min-acceleration -0.025
+  set speed-up 0.1
   set turn-speed 24
 end
 
 to spawn-player
   create-ordered-tanks 1 [
     set player (tank who)
-    set color get-tank-color "player"
+    set color (get-tank-color "player")
     set size 2
     set speed 0
     set team 0
@@ -128,6 +132,17 @@ end
 
 to do-tank-physics
   ask tanks [
+    set speed speed + acceleration
+    if speed > max-tank-speed [
+      set speed max-tank-speed
+    ]
+    if speed < 0 [
+      set speed 0
+    ]
+    set acceleration acceleration - friction
+    if acceleration < min-acceleration [
+      set acceleration min-acceleration
+    ]
     fd speed
   ]
 end
@@ -136,33 +151,18 @@ to do-bullet-physics
   ask bullets [
     fd bullet-speed
     set travel-distance travel-distance + bullet-speed
-    if travel-distance >= max-bullet-travel-distance [
+    if travel-distance >= bullet-travel-distance [
       die 
     ]
   ]
 end
 
-to do-player-logic
-  ask player [
-    if auto-slowdown? [
-      do-auto-slowdown
-    ]
-  ]
-end
-
-to do-auto-slowdown
-  set player-since-last-accel player-since-last-accel + 1
-    if player-since-last-accel > player-accel-before-slowdown [
-      set speed speed - player-slowdown-amount
-      if speed < 0 [
-        set speed 0
-      ]
-    ]
+to render
+  display
+  no-display
 end
 
 to keep-time
-  display
-  no-display
   let time-since-last-tick timer - last-tick-time
   let wait-time (1 / max-fps) - time-since-last-tick
   wait wait-time
@@ -176,10 +176,6 @@ end
 
 to-report player-speed
   report [speed] of player
-end
-
-to-report slowdown
-  report player-since-last-accel
 end
 
 ;; ===============
@@ -254,10 +250,10 @@ NIL
 BUTTON
 193
 174
-282
+289
 207
-Speed Up
-player-speed-up
+Accelerate
+player-accelerate
 NIL
 1
 T
@@ -299,27 +295,11 @@ D
 NIL
 NIL
 
-BUTTON
-179
-295
-287
-328
-Slow Down
-player-slow-down
-NIL
-1
-T
-OBSERVER
-NIL
-S
-NIL
-NIL
-
 MONITOR
-314
-441
-414
-486
+310
+381
+410
+426
 Player Speed
 player-speed
 5
@@ -327,10 +307,10 @@ player-speed
 11
 
 BUTTON
-199
-361
-262
-394
+81
+401
+144
+434
 FIRE!
 player-fire
 NIL
@@ -339,6 +319,33 @@ T
 OBSERVER
 NIL
 NIL
+NIL
+NIL
+
+MONITOR
+281
+443
+412
+488
+Player Acceleration
+[acceleration] of player
+5
+1
+11
+
+BUTTON
+185
+294
+295
+327
+Decelerate
+player-decelerate
+NIL
+1
+T
+OBSERVER
+NIL
+S
 NIL
 NIL
 
