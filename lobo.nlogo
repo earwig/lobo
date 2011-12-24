@@ -4,68 +4,120 @@
 ;; Logo Bolo is a rewrite of the classic tank game by Stuart Cheshire in NetLogo.
 ;;
 
+;; ============
+;; Declarations
+;; ============
+
 globals [
+  last-tick-time
+  max-fps
   max-tank-speed
   player
   player-turn-speed
 ]
 
+breed [bullets bullet]
 breed [tanks tank]
 
 tanks-own [
   speed
 ]
 
+;; ===========================
+;; Button-initiated procedures
+;; ===========================
+
 to setup
   ca
+  set max-fps 30
   set max-tank-speed 20
   set player-turn-speed 10
-  create-tanks 1 [
-    set player who
+  ask patches [
+    set pcolor random 3
+  ]
+  create-ordered-tanks 1 [
+    set player (tank who)
+    set color gray
     set size 2
     set speed 0
   ]
+  set last-tick-time timer
 end
 
 to go
+  do-physics
+  keep-time
 end
 
-to go-forward
-  ask tank player [
+to player-go-forward
+  ask player [
     if speed < max-tank-speed [
       set speed speed + 1
     ]
   ]
 end
 
-to slow-down
-  ask tank player [
+to player-slow-down
+  ask player [
     if speed > 0 [
       set speed speed - 1
     ]
   ]
 end
 
-to turn-left
-  ask tank player [
+to player-turn-left
+  ask player [
     lt player-turn-speed
   ]
 end
 
-to turn-right
-  ask tank player [
+to player-turn-right
+  ask player [
     rt player-turn-speed
   ]
+end
+
+to player-fire
+  ask player [
+    fire
+  ]
+end
+
+;; ================
+;; Other procedures
+;; ================
+
+to fire
+  hatch-bullets 1 [
+    set color white
+  ]
+end
+
+to do-physics
+  ask tanks [
+    fd speed / 40
+  ]
+  ask bullets [
+    fd 1
+  ]
+end
+
+to keep-time
+  let time-since-last-tick timer - last-tick-time
+  let wait-time (1 / max-fps) - time-since-last-tick
+  wait wait-time
+  tick
+  set last-tick-time timer
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
 475
 10
-912
-468
+980
+536
 16
 16
-12.94
+15.0
 1
 10
 1
@@ -85,10 +137,10 @@ GRAPHICS-WINDOW
 ticks
 
 BUTTON
-85
-91
-159
-124
+66
+100
+140
+133
 Setup
 setup
 NIL
@@ -101,10 +153,10 @@ NIL
 NIL
 
 BUTTON
-89
-151
-152
-184
+331
+99
+394
+132
 Go
 go
 T
@@ -117,12 +169,12 @@ NIL
 NIL
 
 BUTTON
-270
-216
-359
-249
+193
+174
+282
+207
 Forward
-go-forward
+player-go-forward
 NIL
 1
 T
@@ -133,12 +185,12 @@ NIL
 NIL
 
 BUTTON
-220
-278
-283
-311
+143
+236
+206
+269
 Left
-turn-left
+player-turn-left
 NIL
 1
 T
@@ -149,12 +201,12 @@ NIL
 NIL
 
 BUTTON
-327
-277
-396
-310
+250
+235
+319
+268
 Right
-turn-right
+player-turn-right
 NIL
 1
 T
@@ -165,12 +217,12 @@ NIL
 NIL
 
 BUTTON
-256
-337
-364
-370
+179
+295
+287
+328
 Slow Down
-slow-down
+player-slow-down
 NIL
 1
 T
@@ -181,15 +233,31 @@ NIL
 NIL
 
 MONITOR
-52
-303
-152
-348
+314
+441
+414
+486
 Player Speed
-[speed] of tank player
+[speed] of player
 17
 1
 11
+
+BUTTON
+199
+361
+262
+394
+FIRE!
+player-fire
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
 
 @#$#@#$#@
 WHAT IS IT?
