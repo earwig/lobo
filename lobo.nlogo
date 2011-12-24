@@ -9,18 +9,27 @@
 ;; ============
 
 globals [
+  bullet-speed
   last-tick-time
+  max-acceleration
+  max-bullet-travel-distance
   max-fps
   max-tank-speed
   player
-  player-turn-speed
+  turn-speed
 ]
 
 breed [bullets bullet]
+breed [crosshairs crosshair]
 breed [tanks tank]
+
+bullets-own [
+  travel-distance
+]
 
 tanks-own [
   speed
+  team
 ]
 
 ;; ===========================
@@ -28,52 +37,52 @@ tanks-own [
 ;; ===========================
 
 to setup
-  ca
-  set max-fps 30
-  set max-tank-speed 20
-  set player-turn-speed 10
+  clear-all
+  no-display
+  setup-defaults
   ask patches [
     set pcolor random 3
   ]
-  create-ordered-tanks 1 [
-    set player (tank who)
-    set color gray
-    set size 2
-    set speed 0
-  ]
+  spawn-player
+  display
+  no-display
   set last-tick-time timer
 end
 
 to go
-  do-physics
+  do-tank-physics
+  do-bullet-physics
+  do-player-logic
   keep-time
 end
 
-to player-go-forward
+to player-speed-up
   ask player [
-    if speed < max-tank-speed [
-      set speed speed + 1
+    set speed speed + max-acceleration
+    if speed > max-tank-speed [
+      set speed max-tank-speed
     ]
   ]
 end
 
 to player-slow-down
   ask player [
-    if speed > 0 [
-      set speed speed - 1
+    set speed speed - max-acceleration
+    if speed < 0 [
+      set speed 0
     ]
   ]
 end
 
 to player-turn-left
   ask player [
-    lt player-turn-speed
+    lt turn-speed
   ]
 end
 
 to player-turn-right
   ask player [
-    rt player-turn-speed
+    rt turn-speed
   ]
 end
 
@@ -87,27 +96,101 @@ end
 ;; Other procedures
 ;; ================
 
+to setup-defaults
+  set bullet-speed 2
+  set max-acceleration 0.05
+  set max-bullet-travel-distance 16
+  set max-fps 30
+  set max-tank-speed 0.3
+  set player-accel-before-slowdown 15
+  set player-since-last-accel 0
+  set player-slowdown-amount 0.01
+  set turn-speed 24
+end
+
+to spawn-player
+  create-ordered-tanks 1 [
+    set player (tank who)
+    set color get-tank-color "player"
+    set size 2
+    set speed 0
+    set team 0
+  ]
+end
+
 to fire
   hatch-bullets 1 [
     set color white
+    set size 1
+    set travel-distance 0
   ]
 end
 
-to do-physics
+to do-tank-physics
   ask tanks [
-    fd speed / 40
+    fd speed
   ]
+end
+
+to do-bullet-physics
   ask bullets [
-    fd 1
+    fd bullet-speed
+    set travel-distance travel-distance + bullet-speed
+    if travel-distance >= max-bullet-travel-distance [
+      die 
+    ]
   ]
+end
+
+to do-player-logic
+  ask player [
+    if auto-slowdown? [
+      do-auto-slowdown
+    ]
+  ]
+end
+
+to do-auto-slowdown
+  set player-since-last-accel player-since-last-accel + 1
+    if player-since-last-accel > player-accel-before-slowdown [
+      set speed speed - player-slowdown-amount
+      if speed < 0 [
+        set speed 0
+      ]
+    ]
 end
 
 to keep-time
+  display
+  no-display
   let time-since-last-tick timer - last-tick-time
   let wait-time (1 / max-fps) - time-since-last-tick
   wait wait-time
   tick
   set last-tick-time timer
+end
+
+;; =================
+;; Monitor reporters
+;; =================
+
+to-report player-speed
+  report [speed] of player
+end
+
+to-report slowdown
+  report player-since-last-accel
+end
+
+;; ===============
+;; Other reporters
+;; ===============
+
+to-report get-tank-color [affiliation]
+  if affiliation = "player" [ report gray ]
+  if affiliation = "enemy"  [ report red ]
+  if affiliation = "ally"   [ report green ]
+  report black
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -139,9 +222,9 @@ ticks
 BUTTON
 66
 100
-140
+161
 133
-Setup
+New Game
 setup
 NIL
 1
@@ -153,11 +236,11 @@ NIL
 NIL
 
 BUTTON
-331
+313
 99
-394
+407
 132
-Go
+Play Game
 go
 T
 1
@@ -173,8 +256,8 @@ BUTTON
 174
 282
 207
-Forward
-player-go-forward
+Speed Up
+player-speed-up
 NIL
 1
 T
@@ -238,8 +321,8 @@ MONITOR
 414
 486
 Player Speed
-[speed] of player
-17
+player-speed
+5
 1
 11
 
