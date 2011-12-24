@@ -1,4 +1,62 @@
+;; lobo: Logo Bolo
+;; (c) Ben Kurtovic, 2011
+;;
+;; Logo Bolo is a rewrite of the classic tank game by Stuart Cheshire in NetLogo.
+;;
 
+globals [
+  max-tank-speed
+  player
+  player-turn-speed
+]
+
+breed [tanks tank]
+
+tanks-own [
+  speed
+]
+
+to setup
+  ca
+  set max-tank-speed 20
+  set player-turn-speed 10
+  create-tanks 1 [
+    set player who
+    set size 2
+    set speed 0
+  ]
+end
+
+to go
+end
+
+to go-forward
+  ask tank player [
+    if speed < max-tank-speed [
+      set speed speed + 1
+    ]
+  ]
+end
+
+to slow-down
+  ask tank player [
+    if speed > 0 [
+      set speed speed - 1
+    ]
+  ]
+end
+
+to turn-left
+  ask tank player [
+    lt player-turn-speed
+  ]
+end
+
+to turn-right
+  ask tank player [
+    rt player-turn-speed
+  ]
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
 475
@@ -25,6 +83,113 @@ GRAPHICS-WINDOW
 0
 1
 ticks
+
+BUTTON
+85
+91
+159
+124
+Setup
+setup
+NIL
+1
+T
+OBSERVER
+NIL
+R
+NIL
+NIL
+
+BUTTON
+89
+151
+152
+184
+Go
+go
+T
+1
+T
+OBSERVER
+NIL
+G
+NIL
+NIL
+
+BUTTON
+270
+216
+359
+249
+Forward
+go-forward
+NIL
+1
+T
+OBSERVER
+NIL
+W
+NIL
+NIL
+
+BUTTON
+220
+278
+283
+311
+Left
+turn-left
+NIL
+1
+T
+OBSERVER
+NIL
+A
+NIL
+NIL
+
+BUTTON
+327
+277
+396
+310
+Right
+turn-right
+NIL
+1
+T
+OBSERVER
+NIL
+D
+NIL
+NIL
+
+BUTTON
+256
+337
+364
+370
+Slow Down
+slow-down
+NIL
+1
+T
+OBSERVER
+NIL
+S
+NIL
+NIL
+
+MONITOR
+52
+303
+152
+348
+Player Speed
+[speed] of tank player
+17
+1
+11
 
 @#$#@#$#@
 WHAT IS IT?
