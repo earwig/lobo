@@ -11,10 +11,13 @@ bullets-own [
 
 to fire
   hatch-bullets 1 [
-    set color white
     set max-travel-distance 8
     set speed 1
     set travel-distance 0
+
+    set color white
+    set shape "bullet"
+    set size 0.5
   ]
 end
 

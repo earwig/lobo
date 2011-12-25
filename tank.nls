@@ -15,7 +15,6 @@ tanks-own [
 ]
 
 to set-tank-vars [tank-team player-tank?]
-  set heading 0
   set acceleration 0.03
   set friction 0.0075
   set is-accelerating? false
@@ -24,25 +23,37 @@ to set-tank-vars [tank-team player-tank?]
   set max-turn 24
   set speed 0
   set team tank-team
+
   set color get-tank-color
+  set heading 0
+  set shape "tank"
+  set size 1.5
 end
 
 to do-tank-logic
   if is-accelerating? [
-    set speed speed + acceleration
-    if speed > max-speed [
-      set speed max-speed
-    ]
+    accelerate acceleration
   ]
   fd speed
-  set speed speed - friction
+  decelerate friction
+end
+
+to accelerate [amount]
+  set speed speed + amount
+  if speed > max-speed [
+    set speed max-speed
+  ]
+end
+
+to decelerate [amount]
+  set speed speed - amount
   if speed < 0 [
     set speed 0
   ]
 end
 
 to-report get-tank-color
-  if is-player? [ report gray ]
+  if is-player? [ report black ]
   if team = 0 [ report green ]
   report red
 end
