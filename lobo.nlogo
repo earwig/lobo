@@ -8,32 +8,18 @@
 ;; Declarations
 ;; ============
 
+__includes [
+  "bullet.nls"
+  "player.nls"
+  "tank.nls"
+]
+
 globals [
   last-tick-time
   max-fps
   mouse-was-down?
   player
   player-accelerate-for
-]
-
-breed [bullets bullet]
-breed [crosshairs crosshair]
-breed [tanks tank]
-
-bullets-own [
-  max-travel-distance
-  speed
-  travel-distance
-]
-
-tanks-own [
-  acceleration
-  friction
-  is-accelerating?
-  max-speed
-  max-turn
-  speed
-  team
 ]
 
 ;; ===========================
@@ -67,12 +53,6 @@ to go
   keep-time
 end
 
-to player-fire
-  ask player [
-    fire
-  ]
-end
-
 ;; ================
 ;; Other procedures
 ;; ================
@@ -83,80 +63,6 @@ to setup-defaults
   set max-fps 30
   set mouse-was-down? false
   set player-accelerate-for 0
-end
-
-to spawn-player
-  create-ordered-tanks 1 [
-    set player (tank who)
-    set color (get-tank-color "player")
-    set acceleration 0.05
-    set friction 0.01
-    set is-accelerating? false
-    set max-speed 0.3
-    set max-turn 24
-    set speed 0
-    set team 0
-  ]
-end
-
-to fire
-  hatch-bullets 1 [
-    set color white
-    set size 1
-    set max-travel-distance 8
-    set speed 2
-    set travel-distance 0
-  ]
-end
-
-to do-player-logic
-  if mouse-inside? [
-    if mouse-down? and not mouse-was-down? [
-      set player-accelerate-for player-accelerate-for + 5
-      if player-accelerate-for > 30 [
-        set player-accelerate-for 30
-      ]
-    ]
-    set mouse-was-down? mouse-down?
-    let old-heading heading
-    facexy mouse-xcor mouse-ycor
-
-    if subtract-headings old-heading heading > max-turn [
-      set heading old-heading - max-turn
-    ]
-    if subtract-headings old-heading heading < 0 - max-turn [
-      set heading old-heading + max-turn
-    ]
-  ]
-
-  ifelse player-accelerate-for > 0 [
-    set player-accelerate-for player-accelerate-for - 1
-    set is-accelerating? true
-  ] [
-    set is-accelerating? false
-  ]
-end
-
-to do-tank-logic
-  if is-accelerating? [
-    set speed speed + acceleration
-    if speed > max-speed [
-      set speed max-speed
-    ]
-  ]
-  fd speed
-  set speed speed - friction
-  if speed < 0 [
-    set speed 0
-  ]
-end
-
-to do-bullet-logic
-  fd speed
-  set travel-distance travel-distance + speed
-  if travel-distance > max-travel-distance [
-    die 
-  ]
 end
 
 to render
@@ -170,25 +76,6 @@ to keep-time
   wait wait-time
   tick
   set last-tick-time timer
-end
-
-;; =================
-;; Monitor reporters
-;; =================
-
-to-report player-speed
-  report [speed] of player
-end
-
-;; ===============
-;; Other reporters
-;; ===============
-
-to-report get-tank-color [affiliation]
-  if affiliation = "player" [ report gray ]
-  if affiliation = "enemy"  [ report red ]
-  if affiliation = "ally"   [ report green ]
-  report black
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -251,11 +138,11 @@ NIL
 
 MONITOR
 297
-381
+382
 410
-426
+427
 Player Speed
-player-speed
+[speed] of player
 8
 1
 11
@@ -272,7 +159,7 @@ NIL
 T
 OBSERVER
 NIL
-NIL
+F
 NIL
 NIL
 

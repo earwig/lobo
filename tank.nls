@@ -1,0 +1,48 @@
+;; lobo: Logo Bolo
+;; (c) Ben Kurtovic, 2011
+
+breed [tanks tank]
+
+tanks-own [
+  acceleration
+  friction
+  is-accelerating?
+  is-player?
+  max-speed
+  max-turn
+  speed
+  team
+]
+
+to set-tank-vars [tank-team player-tank?]
+  set heading 0
+  set acceleration 0.03
+  set friction 0.0075
+  set is-accelerating? false
+  set is-player? player-tank?
+  set max-speed 0.25
+  set max-turn 24
+  set speed 0
+  set team tank-team
+  set color get-tank-color
+end
+
+to do-tank-logic
+  if is-accelerating? [
+    set speed speed + acceleration
+    if speed > max-speed [
+      set speed max-speed
+    ]
+  ]
+  fd speed
+  set speed speed - friction
+  if speed < 0 [
+    set speed 0
+  ]
+end
+
+to-report get-tank-color
+  if is-player? [ report gray ]
+  if team = 0 [ report green ]
+  report red
+end

@@ -1,0 +1,27 @@
+;; lobo: Logo Bolo
+;; (c) Ben Kurtovic, 2011
+
+breed [bullets bullet]
+
+bullets-own [
+  max-travel-distance
+  speed
+  travel-distance
+]
+
+to fire
+  hatch-bullets 1 [
+    set color white
+    set max-travel-distance 8
+    set speed 1
+    set travel-distance 0
+  ]
+end
+
+to do-bullet-logic
+  fd speed
+  set travel-distance travel-distance + speed
+  if travel-distance > max-travel-distance [
+    die 
+  ]
+end

@@ -1,0 +1,52 @@
+;; lobo: Logo Bolo
+;; (c) Ben Kurtovic, 2011
+
+to spawn-player
+  create-tanks 1 [
+    set player tank who
+    set-tank-vars 0 true
+  ]
+end
+
+to player-fire
+  ask player [
+    fire
+  ]
+end
+
+to do-player-logic
+  if mouse-inside? [
+    if mouse-down? and not mouse-was-down? [
+      set player-accelerate-for player-accelerate-for + 5
+      if player-accelerate-for > 30 [
+        set player-accelerate-for 30
+      ]
+    ]
+    set mouse-was-down? mouse-down?
+    let old-heading heading
+
+    ; Slow down the tank a bit more than usual if we're
+    ; very close to the mouse:
+    if distancexy mouse-xcor mouse-ycor < 2.5 [
+      set speed speed - friction
+      if speed < 0 [
+        set speed 0
+      ]
+    ]
+
+    facexy mouse-xcor mouse-ycor
+    if subtract-headings old-heading heading > max-turn [
+      set heading old-heading - max-turn
+    ]
+    if subtract-headings old-heading heading < 0 - max-turn [
+      set heading old-heading + max-turn
+    ]
+  ]
+
+  ifelse player-accelerate-for > 0 [
+    set player-accelerate-for player-accelerate-for - 1
+    set is-accelerating? true
+  ] [
+    set is-accelerating? false
+  ]
+end
