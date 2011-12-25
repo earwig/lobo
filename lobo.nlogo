@@ -1,7 +1,7 @@
 ;; lobo: Logo Bolo
 ;; (c) Ben Kurtovic, 2011
 ;;
-;; Logo Bolo is a rewrite of the classic tank game by Stuart Cheshire in NetLogo.
+;; Logo Bolo is a re-envisioning of the classic tank game by Stuart Cheshire in NetLogo.
 ;;
 
 ;; ============
@@ -9,17 +9,11 @@
 ;; ============
 
 globals [
-  bullet-speed
-  bullet-travel-distance
-  friction
   last-tick-time
-  max-acceleration
   max-fps
-  max-tank-speed
-  min-acceleration
+  mouse-was-down?
   player
-  speed-up
-  turn-speed
+  player-accelerate-for
 ]
 
 breed [bullets bullet]
@@ -27,11 +21,17 @@ breed [crosshairs crosshair]
 breed [tanks tank]
 
 bullets-own [
+  max-travel-distance
+  speed
   travel-distance
 ]
 
 tanks-own [
   acceleration
+  friction
+  is-accelerating?
+  max-speed
+  max-turn
   speed
   team
 ]
@@ -54,40 +54,17 @@ to setup
 end
 
 to go
-  do-tank-physics
-  do-bullet-physics
+  ask player [
+    do-player-logic
+  ]
+  ask tanks [
+    do-tank-logic
+  ]
+  ask bullets [
+    do-bullet-logic
+  ]
   render
   keep-time
-end
-
-to player-accelerate
-  ask player [
-    if acceleration < 0 [
-      set acceleration 0
-    ]
-    set acceleration acceleration + speed-up
-    if acceleration > max-acceleration [
-      set acceleration max-acceleration
-    ]
-  ]
-end
-
-to player-decelerate
-  ask player [
-    set acceleration min-acceleration
-  ]
-end
-
-to player-turn-left
-  ask player [
-    lt turn-speed
-  ]
-end
-
-to player-turn-right
-  ask player [
-    rt turn-speed
-  ]
 end
 
 to player-fire
@@ -101,22 +78,22 @@ end
 ;; ================
 
 to setup-defaults
-  set bullet-speed 2
-  set bullet-travel-distance 16
-  set friction 0.01
-  set max-acceleration 0.5
+  set-patch-size 30
+  resize-world -8 8 -8 8
   set max-fps 30
-  set max-tank-speed 0.3
-  set min-acceleration -0.025
-  set speed-up 0.1
-  set turn-speed 24
+  set mouse-was-down? false
+  set player-accelerate-for 0
 end
 
 to spawn-player
   create-ordered-tanks 1 [
     set player (tank who)
     set color (get-tank-color "player")
-    set size 2
+    set acceleration 0.05
+    set friction 0.01
+    set is-accelerating? false
+    set max-speed 0.3
+    set max-turn 24
     set speed 0
     set team 0
   ]
@@ -126,34 +103,59 @@ to fire
   hatch-bullets 1 [
     set color white
     set size 1
+    set max-travel-distance 8
+    set speed 2
     set travel-distance 0
   ]
 end
 
-to do-tank-physics
-  ask tanks [
-    set speed speed + acceleration
-    if speed > max-tank-speed [
-      set speed max-tank-speed
+to do-player-logic
+  if mouse-inside? [
+    if mouse-down? and not mouse-was-down? [
+      set player-accelerate-for player-accelerate-for + 5
+      if player-accelerate-for > 30 [
+        set player-accelerate-for 30
+      ]
     ]
-    if speed < 0 [
-      set speed 0
+    set mouse-was-down? mouse-down?
+    let old-heading heading
+    facexy mouse-xcor mouse-ycor
+
+    if subtract-headings old-heading heading > max-turn [
+      set heading old-heading - max-turn
     ]
-    set acceleration acceleration - friction
-    if acceleration < min-acceleration [
-      set acceleration min-acceleration
+    if subtract-headings old-heading heading < 0 - max-turn [
+      set heading old-heading + max-turn
     ]
-    fd speed
+  ]
+
+  ifelse player-accelerate-for > 0 [
+    set player-accelerate-for player-accelerate-for - 1
+    set is-accelerating? true
+  ] [
+    set is-accelerating? false
   ]
 end
 
-to do-bullet-physics
-  ask bullets [
-    fd bullet-speed
-    set travel-distance travel-distance + bullet-speed
-    if travel-distance >= bullet-travel-distance [
-      die 
+to do-tank-logic
+  if is-accelerating? [
+    set speed speed + acceleration
+    if speed > max-speed [
+      set speed max-speed
     ]
+  ]
+  fd speed
+  set speed speed - friction
+  if speed < 0 [
+    set speed 0
+  ]
+end
+
+to do-bullet-logic
+  fd speed
+  set travel-distance travel-distance + speed
+  if travel-distance > max-travel-distance [
+    die 
   ]
 end
 
@@ -192,11 +194,11 @@ end
 GRAPHICS-WINDOW
 475
 10
-980
-536
-16
-16
-15.0
+995
+551
+8
+8
+30.0
 1
 10
 1
@@ -206,10 +208,10 @@ GRAPHICS-WINDOW
 1
 1
 1
--16
-16
--16
-16
+-8
+8
+-8
+8
 0
 0
 1
@@ -247,70 +249,22 @@ G
 NIL
 NIL
 
-BUTTON
-193
-174
-289
-207
-Accelerate
-player-accelerate
-NIL
-1
-T
-OBSERVER
-NIL
-W
-NIL
-NIL
-
-BUTTON
-143
-236
-206
-269
-Left
-player-turn-left
-NIL
-1
-T
-OBSERVER
-NIL
-A
-NIL
-NIL
-
-BUTTON
-250
-235
-319
-268
-Right
-player-turn-right
-NIL
-1
-T
-OBSERVER
-NIL
-D
-NIL
-NIL
-
 MONITOR
-310
+297
 381
 410
 426
 Player Speed
 player-speed
-5
+8
 1
 11
 
 BUTTON
-81
-401
-144
-434
+108
+176
+285
+252
 FIRE!
 player-fire
 NIL
@@ -323,31 +277,15 @@ NIL
 NIL
 
 MONITOR
-281
-443
-412
-488
-Player Acceleration
-[acceleration] of player
+296
+433
+410
+478
+Player Accel Time
+player-accelerate-for
 5
 1
 11
-
-BUTTON
-185
-294
-295
-327
-Decelerate
-player-decelerate
-NIL
-1
-T
-OBSERVER
-NIL
-S
-NIL
-NIL
 
 @#$#@#$#@
 WHAT IS IT?
