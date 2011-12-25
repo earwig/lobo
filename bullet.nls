@@ -5,26 +5,31 @@ breed [bullets bullet]
 
 bullets-own [
   max-travel-distance
+  shooter
   speed
   travel-distance
 ]
-
-to fire
-  hatch-bullets 1 [
-    set max-travel-distance 8
-    set speed 1
-    set travel-distance 0
-
-    set color white
-    set shape "bullet"
-    set size 0.5
-  ]
-end
 
 to do-bullet-logic
   fd speed
   set travel-distance travel-distance + speed
   if travel-distance > max-travel-distance [
-    die 
+    die
+  ]
+
+  let mxcor xcor
+  let mycor ycor
+  let is-close-enough false
+  let target min-one-of (turtles-here with [breed = tanks]) [distancexy mxcor mycor]
+  if target != nobody [
+    ask target [
+      if distancexy mxcor mycor < 0.65 [
+        set is-close-enough true
+        shot-at myself
+      ]
+    ]
+  ]
+  if is-close-enough [
+    die
   ]
 end

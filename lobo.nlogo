@@ -20,6 +20,8 @@ globals [
   mouse-was-down?
   player
   player-accelerate-for
+  player-deaths
+  player-kills
 ]
 
 ;; ===========================
@@ -34,6 +36,7 @@ to setup
     set pcolor (random 3) - 5 + green
   ]
   spawn-player
+  spawn-tank 1
   render
   set last-tick-time timer
 end
@@ -48,6 +51,7 @@ to go
   ask bullets [
     do-bullet-logic
   ]
+  show-crosshair
   render
   keep-time
 end
@@ -56,12 +60,45 @@ end
 ;; Other procedures
 ;; ================
 
+to debug [action msg]
+  output-print (word (round timer) ": " action ": " msg)
+end
+
 to setup-defaults
   set-patch-size 30
   resize-world -8 8 -8 8
   set max-fps 30
   set mouse-was-down? false
   set player-accelerate-for 0
+  set player-deaths 0
+  set player-kills 0
+end
+
+to show-crosshair
+  clear-drawing
+  if mouse-inside? [
+    ask patch mouse-xcor mouse-ycor [
+      sprout 1 [
+        set color white
+        set heading 0
+        make-square
+        die
+      ]
+    ]
+  ]
+end
+
+to make-square
+  fd 0.5
+  pd
+  rt 90
+  fd 0.5
+  repeat 3 [
+    rt 90
+    fd 1
+  ]
+  rt 90
+  fd 0.5
 end
 
 to render
@@ -78,9 +115,9 @@ to keep-time
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-475
+452
 10
-995
+972
 551
 8
 8
@@ -104,9 +141,9 @@ GRAPHICS-WINDOW
 ticks
 
 BUTTON
-66
+43
 100
-161
+138
 133
 New Game
 setup
@@ -120,9 +157,9 @@ NIL
 NIL
 
 BUTTON
-313
+290
 99
-407
+384
 132
 Play Game
 go
@@ -136,21 +173,21 @@ NIL
 NIL
 
 MONITOR
-297
-382
-410
-427
+269
+290
+389
+339
 Player Speed
 [speed] of player
 8
 1
-11
+12
 
 BUTTON
-108
-176
-285
-252
+148
+181
+269
+233
 FIRE!
 player-fire
 NIL
@@ -163,15 +200,66 @@ NIL
 NIL
 
 MONITOR
-296
-433
-410
-478
+270
+350
+389
+399
 Player Accel Time
 player-accelerate-for
 5
 1
-11
+12
+
+OUTPUT
+998
+30
+1375
+521
+12
+
+MONITOR
+55
+290
+149
+339
+Player Deaths
+player-deaths
+17
+1
+12
+
+MONITOR
+55
+350
+148
+399
+Player Kills
+player-kills
+17
+1
+12
+
+MONITOR
+160
+290
+261
+339
+Player Ammo
+[ammunition] of player
+17
+1
+12
+
+MONITOR
+160
+350
+260
+399
+Player Armor
+[armor] of player
+17
+1
+12
 
 @#$#@#$#@
 WHAT IS IT?

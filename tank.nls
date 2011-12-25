@@ -5,6 +5,8 @@ breed [tanks tank]
 
 tanks-own [
   acceleration
+  ammunition
+  armor
   friction
   is-accelerating?
   is-player?
@@ -14,8 +16,16 @@ tanks-own [
   team
 ]
 
+to spawn-tank [tank-team]
+  create-tanks 1 [
+    set-tank-vars tank-team false
+  ]
+end
+
 to set-tank-vars [tank-team player-tank?]
   set acceleration 0.03
+  set ammunition 20
+  set armor 8
   set friction 0.0075
   set is-accelerating? false
   set is-player? player-tank?
@@ -49,6 +59,30 @@ to decelerate [amount]
   set speed speed - amount
   if speed < 0 [
     set speed 0
+  ]
+end
+
+to fire
+  if ammunition > 0 [
+    set ammunition ammunition - 1
+    hatch-bullets 1 [
+      set max-travel-distance 8
+      set shooter [who] of myself
+      set speed 1
+      set travel-distance 0
+
+      set color white
+      set shape "bullet"
+      set size 0.5
+    ]
+  ]
+end
+
+to shot-at [bullet]
+  debug "SHOT" (word ([shooter] of myself) " -> " who)
+  set armor armor - 1
+  if armor = 0 [
+    die
   ]
 end
 
