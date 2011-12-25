@@ -14,6 +14,11 @@ __includes [
   "tank.nls"
 ]
 
+extensions [
+  sound
+  table
+]
+
 globals [
   last-tick-time
   max-fps
@@ -22,6 +27,7 @@ globals [
   player-accelerate-for
   player-deaths
   player-kills
+  sounds
 ]
 
 ;; ===========================
@@ -36,7 +42,8 @@ to setup
     set pcolor (random 3) - 5 + green
   ]
   spawn-player
-  spawn-tank 1
+  spawn-tank 0 ask tank 1 [ setxy -10 0 ]
+  spawn-tank 1 ask tank 2 [ setxy  10 0 ]
   render
   set last-tick-time timer
 end
@@ -61,6 +68,8 @@ end
 ;; ================
 
 to debug [action msg]
+  ; Comment this and remove the output box
+  ; to turn off debugging info:
   output-print (word (round timer) ": " action ": " msg)
 end
 
@@ -72,6 +81,20 @@ to setup-defaults
   set player-accelerate-for 0
   set player-deaths 0
   set player-kills 0
+  make-sounds-table
+end
+
+to make-sounds-table
+  set sounds table:make
+  table:put sounds "fire player" "Hand Clap"
+  table:put sounds "fire ally"   "Hand Clap"
+  table:put sounds "fire enemy"  "Hand Clap"
+  table:put sounds "shot player" "Acoustic Snare"
+  table:put sounds "shot ally"   "Acoustic Snare"
+  table:put sounds "shot enemy"  "Acoustic Snare"
+  table:put sounds "kill player" "Electric Snare"
+  table:put sounds "kill ally"   "Electric Snare"
+  table:put sounds "kill enemy"  "Electric Snare"
 end
 
 to show-crosshair
@@ -112,6 +135,17 @@ to keep-time
   wait wait-time
   tick
   set last-tick-time timer
+end
+
+to play-sound [name]
+  if enable-sound? [
+    let sname (word name " " get-tank-affiliation)
+    let dist distancexy ([xcor] of player) ([ycor] of player)
+    let volume 127 - (dist * 4)
+    if volume > 0 [
+      sound:play-drum (table:get sounds sname) volume
+    ]
+  ]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -184,10 +218,10 @@ Player Speed
 12
 
 BUTTON
-148
-181
-269
-233
+109
+172
+230
+224
 FIRE!
 player-fire
 NIL
@@ -260,6 +294,17 @@ Player Armor
 17
 1
 12
+
+SWITCH
+264
+179
+394
+212
+enable-sound?
+enable-sound?
+0
+1
+-1000
 
 @#$#@#$#@
 WHAT IS IT?
