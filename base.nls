@@ -1,0 +1,136 @@
+;; lobo: Logo Bolo
+;; (c) Ben Kurtovic, 2011
+
+globals [
+  base-max-ammo
+  base-max-armor
+]
+
+breed [bases base]
+
+bases-own [
+  ammunition
+  armor
+  last-ammo-regen
+  last-armor-regen
+  last-refuel
+  team
+]
+
+;; ==========
+;; Procedures
+;; ==========
+
+to spawn-base [base-xcor base-ycor]
+  create-bases 1 [
+    set-base-vars base-max-ammo base-max-armor -1 base-xcor base-ycor
+  ]
+end
+
+to set-base-vars [b-ammo b-armor b-team b-xcor b-ycor]
+  set ammunition b-ammo
+  set armor b-armor
+  set team b-team
+  set last-ammo-regen timer
+  set last-armor-regen timer
+  set last-refuel timer
+
+  set color get-base-color
+  set shape "base"
+  set size 1.15
+  setxy b-xcor b-ycor
+end
+
+to do-base-logic
+  ifelse team = -1 [
+    if any? tanks-here [
+      claim-base one-of tanks-here
+    ]
+  ] [
+    let allies-here tanks-here with [team = ([team] of myself)]
+    let enemies-here tanks-here with [team != ([team] of myself)]
+    if any? allies-here [
+      refuel-tank one-of allies-here
+    ]
+    if any? enemies-here and armor = 0 [
+      claim-base one-of enemies-here
+      set armor 1
+    ]
+  ]
+  regenerate
+  set label armor
+end
+
+to claim-base [claimer]
+  set team [team] of claimer
+  set color get-base-color
+end
+
+to refuel-tank [tank-to-refuel]
+  let did-armor-refuel? false
+  let did-ammo-refuel? false
+  let time-since-last-refuel timer - last-refuel
+
+  ask tank-to-refuel [
+    if armor < tank-max-armor and ([armor] of myself) > 1 and time-since-last-refuel > 25 / max-fps [  ; 25 frames
+      set armor armor + 1
+      set did-armor-refuel? true
+    ]
+    if ammunition < tank-max-ammo and ([ammunition] of myself) > 1 and time-since-last-refuel > 10 / max-fps [  ; 10 frames
+      set ammunition ammunition + 1
+      set did-ammo-refuel? true
+    ]
+  ]
+
+  if did-armor-refuel? or did-ammo-refuel? [
+    set last-refuel timer
+    ifelse did-armor-refuel? [
+      set armor armor - 1
+    ] [
+      set ammunition ammunition - 1
+    ]
+  ]
+end
+
+to regenerate
+  let time-since-last-ammo-regen timer - last-ammo-regen
+  let time-since-last-armor-regen timer - last-armor-regen
+
+  if ammunition < base-max-ammo and time-since-last-ammo-regen > 10 [
+    set ammunition ammunition + 1
+    set last-ammo-regen timer
+  ]
+  if armor < base-max-armor and time-since-last-armor-regen > 25 [
+    set armor armor + 1
+    set last-armor-regen timer 
+  ]
+end
+
+to base-shot-at
+  debug "BASE-SHOT" (word who " by " ([shooter] of myself))
+  set armor armor - 1
+  ifelse armor > 0 [
+    explode "decay"
+    play-sound "shot"
+  ] [
+    explode "shot"
+    play-sound "kill"
+  ]
+end
+
+;; =========
+;; Reporters
+;; =========
+
+to-report get-base-afiliation
+  if team = -1 [ report "neutral" ]
+  if team = 0  [ report "ally"    ]
+  report "enemy"
+end
+
+to-report get-base-color
+  let affiliation get-base-afiliation
+  if affiliation = "neutral" [ report gray  ]
+  if affiliation = "ally"    [ report green ]
+  if affiliation = "enemy"   [ report red   ]
+end

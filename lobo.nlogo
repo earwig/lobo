@@ -5,6 +5,7 @@
 ;;
 
 __includes [
+  "base.nls"
   "bullet.nls"
   "explosion.nls"
   "player.nls"
@@ -34,9 +35,12 @@ to setup
   make-sounds-table
   make-explosions-table
   load-map
-  spawn-player
-  spawn-tank 0 ask tank 1 [ setxy -6 0 ]
-  spawn-tank 1 ask tank 2 [ setxy  6 0 ]
+  spawn-player 0 0 0
+  spawn-tank 0 -6 0 90
+  spawn-tank 1 6 0 270
+  ;spawn-base -3 -7
+  spawn-base 0 -7
+  ;spawn-base 3 -7
   render
   set last-tick-time timer
 end
@@ -47,6 +51,9 @@ to go
   ]
   ask tanks [
     do-tank-logic
+  ]
+  ask bases [
+    do-base-logic
   ]
   ask bullets [
     do-bullet-logic
@@ -91,6 +98,10 @@ to setup-defaults
   set player-kills 0
   set player-target-xcor 0
   set player-target-ycor 0
+  set tank-max-ammo 24
+  set tank-max-armor 8
+  set base-max-ammo 50
+  set base-max-armor 20
 end
 
 to make-sounds-table
@@ -260,10 +271,10 @@ player-has-target?
 12
 
 OUTPUT
-998
-30
-1375
-521
+1012
+10
+1500
+557
 12
 
 MONITOR
@@ -397,6 +408,39 @@ default
 true
 0
 Polygon -7500403 true true 150 5 40 250 150 205 260 250
+
+base
+false
+0
+Rectangle -1184463 true false 60 240 120 255
+Rectangle -1184463 true false 120 225 180 240
+Rectangle -1184463 true false 180 240 240 255
+Polygon -1184463 true false 45 240 30 240 30 270 60 270 60 255 45 255
+Polygon -7500403 true true 195 210 195 225 225 225 225 195 210 195 210 210
+Polygon -1184463 true false 60 45 60 30 30 30 30 60 45 60 45 45
+Polygon -1184463 true false 240 255 240 270 270 270 270 240 255 240 255 255
+Rectangle -1184463 true false 45 60 60 120
+Rectangle -1184463 true false 180 45 240 60
+Rectangle -1184463 true false 240 180 255 240
+Rectangle -1184463 true false 60 120 75 180
+Rectangle -1184463 true false 120 60 180 75
+Rectangle -1184463 true false 225 120 240 180
+Rectangle -1184463 true false 45 180 60 240
+Rectangle -1184463 true false 60 45 120 60
+Rectangle -1184463 true false 240 60 255 120
+Rectangle -1184463 true false 135 135 165 165
+Rectangle -1184463 true false 165 120 180 135
+Rectangle -1184463 true false 120 120 135 135
+Rectangle -1184463 true false 120 165 135 180
+Rectangle -1184463 true false 165 165 180 180
+Rectangle -7500403 true true 195 105 210 195
+Polygon -1184463 true false 255 60 270 60 270 30 240 30 240 45 255 45
+Rectangle -7500403 true true 105 90 195 105
+Rectangle -7500403 true true 90 105 105 195
+Rectangle -7500403 true true 105 195 195 210
+Polygon -7500403 true true 210 105 225 105 225 75 195 75 195 90 210 90
+Polygon -7500403 true true 105 90 105 75 75 75 75 105 90 105 90 90
+Polygon -7500403 true true 90 195 75 195 75 225 105 225 105 210 90 210
 
 bullet
 true

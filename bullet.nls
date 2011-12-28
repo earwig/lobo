@@ -26,8 +26,8 @@ to fire-bullet
     set size 0.5
 
     ; Bullets shouldn't travel perfectly straight:
-    lt random 10
-    rt random 10
+    lt random 5
+    rt random 5
     ]
 end
 
@@ -42,12 +42,18 @@ to do-bullet-logic
   let mxcor xcor
   let mycor ycor
   let is-close-enough false
-  let target min-one-of tanks-here [distancexy mxcor mycor]
+  let shootable-bases-here bases-here with [armor > 0 and team != -1 and team != [team] of tank [shooter] of myself]
+  let targets (turtle-set tanks-here shootable-bases-here)
+  let target min-one-of targets [distancexy mxcor mycor]
   if target != nobody [
     ask target [
       if distancexy mxcor mycor < 0.65 [
         set is-close-enough true
-        shot-at
+        ifelse breed = tanks [
+          tank-shot-at
+        ] [
+          base-shot-at
+        ]
       ]
     ]
   ]

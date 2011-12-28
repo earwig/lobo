@@ -1,6 +1,11 @@
 ;; lobo: Logo Bolo
 ;; (c) Ben Kurtovic, 2011
 
+globals [
+  tank-max-ammo
+  tank-max-armor
+]
+
 breed [tanks tank]
 
 tanks-own [
@@ -22,30 +27,31 @@ tanks-own [
 ;; Procedures
 ;; ==========
 
-to spawn-tank [tank-team]
+to spawn-tank [tank-team tank-xcor tank-ycor tank-heading]
   create-tanks 1 [
-    set-tank-vars tank-team false
+    set-tank-vars false tank-team tank-xcor tank-ycor tank-heading
   ]
 end
 
-to set-tank-vars [tank-team player-tank?]
+to set-tank-vars [player? tteam txcor tycor theading]
   set acceleration 0.03
-  set ammunition 24
-  set armor 8
+  set ammunition tank-max-ammo
+  set armor tank-max-armor
   set fire-cool-down 0
   set friction 0.0075
   set is-accelerating? false
-  set is-player? player-tank?
+  set is-player? player?
   set max-fire-rate 7
   set max-speed 0.25
   set max-turn 24
   set speed 0
-  set team tank-team
+  set team tteam
 
   set color get-tank-color
-  set heading 0
+  set heading theading
   set shape "tank"
   set size 1.5
+  setxy txcor tycor
 end
 
 to do-tank-logic
@@ -100,7 +106,7 @@ to fire
   ]
 end
 
-to shot-at
+to tank-shot-at
   debug "SHOT" (word who " by " ([shooter] of myself))
   set armor armor - 1
   ifelse armor = 0 [

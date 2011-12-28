@@ -25,15 +25,17 @@ to make-explosions-table
   table:put explodes "kill"  [["explosion-kill"  3    20  0.5] ["explosion-shot"  1.25 15  1]
                               ["explosion-shot"  1.25 15  1  ] ["explosion-shot"  1.25 10  1]
                               ["explosion-shot"  1.25 10  1  ] ["explosion-decay" 0.65 10  2]
-                              ["explosion-decay" 0.65 10  2  ] ["explosion-decay" 0.65 7.5 2] 
-                              ["explosion-decay" 0.65 7.5 2  ] ["explosion-decay" 0.65 5   3] 
+                              ["explosion-decay" 0.65 10  2  ] ["explosion-decay" 0.65 8   2] 
+                              ["explosion-decay" 0.65 7   2  ] ["explosion-decay" 0.65 5   3] 
                               ["explosion-decay" 0.65 5   3  ]]
 end
 
 to explode [name]
   debug "EXPLODE" name
   let data table:get explodes name
-  foreach data [create-explosion ?]
+  foreach data [
+    create-explosion ?
+  ]
 end
 
 to create-explosion [info]
@@ -42,6 +44,7 @@ to create-explosion [info]
   let lifespan (item 2 info)
   let deviation (item 3 info)
   hatch-explosions 1 [
+    set label ""
     set shape sprite
     set size maxsize / 2
     set midlife lifespan / 2

@@ -14,10 +14,10 @@ globals [
 ;; Procedures
 ;; ==========
 
-to spawn-player
+to spawn-player [tank-xcor tank-ycor tank-heading]
   create-tanks 1 [
     set player tank who
-    set-tank-vars 0 true
+    set-tank-vars true 0 tank-xcor tank-ycor tank-heading
   ]
 end
 
