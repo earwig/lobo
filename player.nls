@@ -8,12 +8,6 @@ to spawn-player
   ]
 end
 
-to player-fire
-  ask player [
-    fire
-  ]
-end
-
 to do-player-logic
   if mouse-inside? [
     if mouse-down? and not mouse-was-down? [
@@ -32,10 +26,20 @@ to do-player-logic
       decelerate friction * 5
     ]
     if dist < 0.1 [
-      set is-accelerating? false
-      set player-has-target? false
+      cancel-target
     ]
   ] [
     tank-facexy mouse-xcor mouse-ycor
   ]
+end
+
+to cancel-order
+  if player-has-target? [
+    cancel-target
+  ]
+end
+
+to cancel-target
+  set is-accelerating? false
+  set player-has-target? false
 end

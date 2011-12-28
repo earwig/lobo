@@ -61,6 +61,18 @@ to go
   keep-time
 end
 
+to player-fire
+  ask player [
+    fire
+  ]
+end
+
+to player-cancel-order
+  ask player [
+    cancel-order
+  ]
+end
+
 ;; ================
 ;; Other procedures
 ;; ================
@@ -319,6 +331,22 @@ word \"(\" player-target-xcor \", \" player-target-ycor \")\"
 10
 1
 12
+
+BUTTON
+109
+235
+230
+268
+Cancel Order
+player-cancel-order
+NIL
+1
+T
+OBSERVER
+NIL
+C
+NIL
+NIL
 
 @#$#@#$#@
 WHAT IS IT?
