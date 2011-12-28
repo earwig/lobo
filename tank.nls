@@ -26,7 +26,7 @@ end
 
 to set-tank-vars [tank-team player-tank?]
   set acceleration 0.03
-  set ammunition 20
+  set ammunition 24
   set armor 8
   set fire-cool-down 0
   set friction 0.0075
@@ -74,34 +74,31 @@ to fire
     debug "FIRE" (word who " (" ammunition " left)")
     set ammunition ammunition - 1
     set fire-cool-down max-fire-rate
-
-    hatch-bullets 1 [
-      set max-travel-distance 8
-      set shooter [who] of myself
-      set speed 1
-      set travel-distance 0
-
-      set color white
-      set shape "bullet"
-      set size 0.5
-
-      lt random 10  ; Bullets shouldn't travel perfectly straight
-      rt random 10
-    ]
+    fire-bullet
     play-sound "fire"
   ]
 end
 
-to shot-at [bullet]
+to shot-at
   debug "SHOT" (word who " by " ([shooter] of myself))
   set armor armor - 1
   ifelse armor = 0 [
-    debug "KILL" (word who " by " ([shooter] of myself))
-    play-sound "kill"
-    die
+    kill-tank
   ] [
-    play-sound "shot"
+    play-sound (word "shot " get-tank-affiliation)
   ]
+end
+
+to kill-tank
+  debug "KILL" (word who " by " ([shooter] of myself))
+  play-sound (word "kill " get-tank-affiliation)
+  if is-player? [
+    set player-deaths player-deaths + 1
+  ]
+  if [is-player?] of (turtle [shooter] of myself) [
+    set player-kills player-kills + 1
+  ]
+  die
 end
 
 to-report get-tank-affiliation

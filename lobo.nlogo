@@ -4,10 +4,6 @@
 ;; Logo Bolo is a re-envisioning of the classic tank game by Stuart Cheshire in NetLogo.
 ;;
 
-;; ============
-;; Declarations
-;; ============
-
 __includes [
   "bullet.nls"
   "player.nls"
@@ -86,9 +82,7 @@ end
 
 to make-sounds-table
   set sounds table:make
-  table:put sounds "fire player" "Hand Clap"
-  table:put sounds "fire ally"   "Hand Clap"
-  table:put sounds "fire enemy"  "Hand Clap"
+  table:put sounds "fire"        "Hand Clap"
   table:put sounds "shot player" "Acoustic Snare"
   table:put sounds "shot ally"   "Acoustic Snare"
   table:put sounds "shot enemy"  "Acoustic Snare"
@@ -139,11 +133,10 @@ end
 
 to play-sound [name]
   if enable-sound? [
-    let sname (word name " " get-tank-affiliation)
     let dist distancexy ([xcor] of player) ([ycor] of player)
     let volume 127 - (dist * 4)
     if volume > 0 [
-      sound:play-drum (table:get sounds sname) volume
+      sound:play-drum (table:get sounds name) volume
     ]
   ]
 end
@@ -363,7 +356,6 @@ Rectangle -16777216 true false 135 30 165 90
 Rectangle -1 true false 135 90 165 150
 Rectangle -1 true false 135 150 165 210
 Polygon -16777216 true false 135 30 150 0 165 30 135 30
-Rectangle -16777216 true false 120 270 120 270
 Rectangle -2674135 true false 135 210 165 270
 Rectangle -16777216 true false 120 270 180 300
 Polygon -7500403 true false 195 210 165 150 165 210 195 210
@@ -376,7 +368,7 @@ true
 1
 Rectangle -7500403 true false 78 85 116 103
 Polygon -7500403 true false 105 270 210 271 210 105 180 105 180 135 120 135 120 105 90 105 89 270
-Polygon -2674135 true true 120 105 120 105 90 105 90 180 120 180 120 195 180 195 180 180 210 180 210 105 180 105 180 105 165 105 165 135 135 135 135 105 120 105
+Polygon -2674135 true true 120 105 90 105 90 180 120 180 120 195 180 195 180 180 210 180 210 105 180 105 165 105 165 135 135 135 135 105 120 105
 Polygon -1 true false 135 15 135 150 165 150 165 15
 Polygon -1 true false 67 105 67 255 97 255 97 105
 Polygon -1 true false 202 105 202 255 232 255 232 105

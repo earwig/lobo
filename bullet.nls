@@ -10,6 +10,22 @@ bullets-own [
   travel-distance
 ]
 
+to fire-bullet
+  hatch-bullets 1 [
+    set max-travel-distance 8
+    set shooter [who] of myself
+    set speed 1
+    set travel-distance 0
+
+    set color white
+    set shape "bullet"
+    set size 0.5
+
+    lt random 10  ; Bullets shouldn't travel perfectly straight
+    rt random 10
+    ]
+end
+
 to do-bullet-logic
   fd speed
   set travel-distance travel-distance + speed
@@ -25,7 +41,7 @@ to do-bullet-logic
     ask target [
       if distancexy mxcor mycor < 0.65 [
         set is-close-enough true
-        shot-at myself
+        shot-at
       ]
     ]
   ]
