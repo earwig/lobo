@@ -21,7 +21,8 @@ to fire-bullet
     set shape "bullet"
     set size 0.5
 
-    lt random 10  ; Bullets shouldn't travel perfectly straight
+    ; Bullets shouldn't travel perfectly straight:
+    lt random 10
     rt random 10
     ]
 end

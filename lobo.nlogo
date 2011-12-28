@@ -20,9 +20,11 @@ globals [
   max-fps
   mouse-was-down?
   player
-  player-accelerate-for
   player-deaths
+  player-has-target?
   player-kills
+  player-target-xcor
+  player-target-ycor
   sounds
 ]
 
@@ -38,8 +40,8 @@ to setup
     set pcolor (random 3) - 5 + green
   ]
   spawn-player
-  spawn-tank 0 ask tank 1 [ setxy -10 0 ]
-  spawn-tank 1 ask tank 2 [ setxy  10 0 ]
+  spawn-tank 0 ask tank 1 [ setxy -6 0 ]
+  spawn-tank 1 ask tank 2 [ setxy  6 0 ]
   render
   set last-tick-time timer
 end
@@ -74,9 +76,11 @@ to setup-defaults
   resize-world -8 8 -8 8
   set max-fps 30
   set mouse-was-down? false
-  set player-accelerate-for 0
   set player-deaths 0
+  set player-has-target? false
   set player-kills 0
+  set player-target-xcor 0
+  set player-target-ycor 0
   make-sounds-table
 end
 
@@ -95,27 +99,33 @@ to show-crosshair
   clear-drawing
   if mouse-inside? [
     ask patch mouse-xcor mouse-ycor [
-      sprout 1 [
-        set color white
-        set heading 0
-        make-square
-        die
-      ]
+      draw-border white 1
+    ]
+  ]
+  if player-has-target? [
+    ask patch player-target-xcor player-target-ycor [
+      draw-border white 2
     ]
   ]
 end
 
-to make-square
-  fd 0.5
-  pd
-  rt 90
-  fd 0.5
-  repeat 3 [
+to draw-border [b-color b-thickness]
+  sprout 1 [
+    set color b-color
+    set pen-size b-thickness
+    set heading 0
+    fd 0.5
+    pd
     rt 90
-    fd 1
+    fd 0.5
+    repeat 3 [
+      rt 90
+      fd 1
+    ]
+    rt 90
+    fd 0.5
+    die
   ]
-  rt 90
-  fd 0.5
 end
 
 to render
@@ -165,7 +175,7 @@ GRAPHICS-WINDOW
 0
 0
 1
-ticks
+frames
 
 BUTTON
 43
@@ -231,8 +241,8 @@ MONITOR
 350
 389
 399
-Player Accel Time
-player-accelerate-for
+Player Has Target?
+player-has-target?
 5
 1
 12
@@ -298,6 +308,17 @@ enable-sound?
 0
 1
 -1000
+
+MONITOR
+272
+411
+390
+460
+Player Target
+word \"(\" player-target-xcor \", \" player-target-ycor \")\"
+10
+1
+12
 
 @#$#@#$#@
 WHAT IS IT?

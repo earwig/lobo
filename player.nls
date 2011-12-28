@@ -17,41 +17,25 @@ end
 to do-player-logic
   if mouse-inside? [
     if mouse-down? and not mouse-was-down? [
-      set player-accelerate-for player-accelerate-for + 10
-      if player-accelerate-for > 60 [
-        set player-accelerate-for 60
-      ]
+      set is-accelerating? true
+      set player-has-target? true
+      set player-target-xcor (round mouse-xcor)
+      set player-target-ycor (round mouse-ycor)
     ]
     set mouse-was-down? mouse-down?
-    let old-heading heading
-
-    ; Slow down the tank a bit more than usual if we're
-    ; very close to the mouse:
-    let mouse-dist distancexy mouse-xcor mouse-ycor
-    if mouse-dist < 3 [
-      decelerate friction
-    ]
-    if mouse-dist < 1.5 [
-      decelerate friction * 6.5
-    ]
-    if mouse-dist < 0.35 [
-      set speed 0
-      set player-accelerate-for 0
-    ]
-
-    facexy mouse-xcor mouse-ycor
-    if subtract-headings old-heading heading > max-turn [
-      set heading old-heading - max-turn
-    ]
-    if subtract-headings old-heading heading < 0 - max-turn [
-      set heading old-heading + max-turn
-    ]
   ]
-
-  ifelse player-accelerate-for > 0 [
-    set player-accelerate-for player-accelerate-for - 1
-    set is-accelerating? true
+  
+  ifelse player-has-target? [
+    tank-facexy player-target-xcor player-target-ycor
+    let dist distancexy player-target-xcor player-target-ycor
+    if dist < 2 and speed > 0.075 [
+      decelerate friction * 5
+    ]
+    if dist < 0.1 [
+      set is-accelerating? false
+      set player-has-target? false
+    ]
   ] [
-    set is-accelerating? false
+    tank-facexy mouse-xcor mouse-ycor
   ]
 end

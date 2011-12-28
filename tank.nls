@@ -69,6 +69,19 @@ to decelerate [amount]
   ]
 end
 
+to tank-facexy [txcor tycor]
+  ;; Face a target at (txcor, tycor) like facexy, but don't
+  ;; turn more than our max turn rate (max-turn¡):
+  let old-heading heading
+  facexy txcor tycor
+  if subtract-headings old-heading heading > max-turn [
+    set heading old-heading - max-turn
+  ]
+  if subtract-headings old-heading heading < 0 - max-turn [
+    set heading old-heading + max-turn
+  ]
+end
+
 to fire
   if ammunition > 0 and fire-cool-down = 0 [
     debug "FIRE" (word who " (" ammunition " left)")
