@@ -82,10 +82,10 @@ end
 ;; Other procedures
 ;; ================
 
-to debug [action msg]
+to debug [agent action msg]
   ; Comment this and remove the output box
   ; to turn off debugging info:
-  output-print (word (round timer) ": " action ": " msg)
+  output-print (word (round timer) ": " agent ": " action " (" msg ")")
 end
 
 to setup-defaults

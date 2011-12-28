@@ -95,7 +95,7 @@ end
 to fire
   if fire-cool-down = 0 [
     ifelse ammunition > 0 [
-      debug "FIRE" (word who " (" ammunition " left)")
+      debug who "TANK-FIRE" (word ammunition " left")
       set ammunition ammunition - 1
       fire-bullet
       play-sound "fire"
@@ -107,7 +107,7 @@ to fire
 end
 
 to tank-shot-at
-  debug "SHOT" (word who " by " ([shooter] of myself))
+  debug who "TANK-SHOT" (word "by " ([shooter] of myself))
   set armor armor - 1
   ifelse armor = 0 [
     explode "kill"
@@ -120,7 +120,7 @@ to tank-shot-at
 end
 
 to kill-tank
-  debug "KILL" (word who " by " ([shooter] of myself))
+  debug who "TANK-KILL" (word "by " ([shooter] of myself))
   if is-player? [
     set player-deaths player-deaths + 1
   ]

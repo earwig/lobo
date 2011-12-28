@@ -62,6 +62,7 @@ to do-base-logic
 end
 
 to claim-base [claimer]
+  debug who "BASE-CLAIM" (word "by " ([who] of claimer) ": " team " -> " [team] of claimer)
   set team [team] of claimer
   set color get-base-color
 end
@@ -107,12 +108,13 @@ to regenerate
 end
 
 to base-shot-at
-  debug "BASE-SHOT" (word who " by " ([shooter] of myself))
   set armor armor - 1
   ifelse armor > 0 [
+    debug who "BASE-SHOT" (word "by " ([shooter] of myself))
     explode "decay"
     play-sound "shot"
   ] [
+    debug who "BASE-KILL" (word "by " ([shooter] of myself))
     explode "shot"
     play-sound "kill"
   ]

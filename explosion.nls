@@ -31,7 +31,6 @@ to make-explosions-table
 end
 
 to explode [name]
-  debug "EXPLODE" name
   let data table:get explodes name
   foreach data [
     create-explosion ?
