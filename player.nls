@@ -1,6 +1,19 @@
 ;; lobo: Logo Bolo
 ;; (c) Ben Kurtovic, 2011
 
+globals [
+  player
+  player-deaths
+  player-has-target?
+  player-kills
+  player-target-xcor
+  player-target-ycor
+]
+
+;; ==========
+;; Procedures
+;; ==========
+
 to spawn-player
   create-tanks 1 [
     set player tank who
@@ -11,10 +24,16 @@ end
 to do-player-logic
   if mouse-inside? [
     if mouse-down? and not mouse-was-down? [
-      set is-accelerating? true
-      set player-has-target? true
-      set player-target-xcor (round mouse-xcor)
-      set player-target-ycor (round mouse-ycor)
+      let txcor round mouse-xcor
+      let tycor round mouse-ycor
+      ifelse player-has-target? and player-target-xcor = txcor and player-target-ycor = tycor [
+        cancel-target
+      ] [
+        set is-accelerating? true
+        set player-has-target? true
+        set player-target-xcor txcor
+        set player-target-ycor tycor
+      ]
     ]
     set mouse-was-down? mouse-down?
   ]
@@ -23,6 +42,8 @@ to do-player-logic
     tank-facexy player-target-xcor player-target-ycor
     let dist distancexy player-target-xcor player-target-ycor
     if dist < 2 and speed > 0.075 [
+      ; Turn on "brakes" if we're getting
+      ; close and we're moving fast:
       decelerate friction * 5
     ]
     if dist < 0.1 [
@@ -42,4 +63,5 @@ end
 to cancel-target
   set is-accelerating? false
   set player-has-target? false
+  set speed speed / 2
 end

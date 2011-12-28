@@ -1,0 +1,66 @@
+;; lobo: Logo Bolo
+;; (c) Ben Kurtovic, 2011
+
+globals [
+  explodes
+]
+
+breed [explosions explosion]
+
+explosions-own [
+  midlife
+  size-increment
+  time-to-live
+]
+
+;; ==========
+;; Procedures
+;; ==========
+
+to make-explosions-table
+  ; Fun with particle effects!
+  set explodes table:make
+  table:put explodes "decay" [["explosion-decay" 0.65 10  0.5]]
+  table:put explodes "shot"  [["explosion-shot"  1.25 10  0.5]]
+  table:put explodes "kill"  [["explosion-kill"  3    20  0.5] ["explosion-shot"  1.25 15  1]
+                              ["explosion-shot"  1.25 15  1  ] ["explosion-shot"  1.25 10  1]
+                              ["explosion-shot"  1.25 10  1  ] ["explosion-decay" 0.65 10  2]
+                              ["explosion-decay" 0.65 10  2  ] ["explosion-decay" 0.65 7.5 2] 
+                              ["explosion-decay" 0.65 7.5 2  ] ["explosion-decay" 0.65 5   3] 
+                              ["explosion-decay" 0.65 5   3  ]]
+end
+
+to explode [name]
+  debug "EXPLODE" name
+  let data table:get explodes name
+  foreach data [create-explosion ?]
+end
+
+to create-explosion [info]
+  let sprite (item 0 info)
+  let maxsize (item 1 info)
+  let lifespan (item 2 info)
+  let deviation (item 3 info)
+  hatch-explosions 1 [
+    set shape sprite
+    set size maxsize / 2
+    set midlife lifespan / 2
+    set size-increment (maxsize / lifespan) * 2
+    set time-to-live lifespan
+    set heading random 360
+    fd (random 100) / (100 / deviation)
+  ]
+end
+
+to keep-exploding
+  if time-to-live = 0 [
+    die
+  ]
+  set time-to-live time-to-live - 1
+  set midlife midlife - 1
+  ifelse midlife > 0 [
+    set size size + size-increment
+  ] [
+    set size size - size-increment
+  ]
+end

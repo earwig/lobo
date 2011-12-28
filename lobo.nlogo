@@ -6,6 +6,7 @@
 
 __includes [
   "bullet.nls"
+  "explosion.nls"
   "player.nls"
   "tank.nls"
 ]
@@ -19,12 +20,6 @@ globals [
   last-tick-time
   max-fps
   mouse-was-down?
-  player
-  player-deaths
-  player-has-target?
-  player-kills
-  player-target-xcor
-  player-target-ycor
   sounds
 ]
 
@@ -36,9 +31,9 @@ to setup
   clear-all
   no-display
   setup-defaults
-  ask patches [
-    set pcolor (random 3) - 5 + green
-  ]
+  make-sounds-table
+  make-explosions-table
+  load-map
   spawn-player
   spawn-tank 0 ask tank 1 [ setxy -6 0 ]
   spawn-tank 1 ask tank 2 [ setxy  6 0 ]
@@ -55,6 +50,9 @@ to go
   ]
   ask bullets [
     do-bullet-logic
+  ]
+  ask explosions [
+    keep-exploding
   ]
   show-crosshair
   render
@@ -93,18 +91,20 @@ to setup-defaults
   set player-kills 0
   set player-target-xcor 0
   set player-target-ycor 0
-  make-sounds-table
 end
 
 to make-sounds-table
   set sounds table:make
-  table:put sounds "fire"        "Hand Clap"
-  table:put sounds "shot player" "Acoustic Snare"
-  table:put sounds "shot ally"   "Acoustic Snare"
-  table:put sounds "shot enemy"  "Acoustic Snare"
-  table:put sounds "kill player" "Electric Snare"
-  table:put sounds "kill ally"   "Electric Snare"
-  table:put sounds "kill enemy"  "Electric Snare"
+  table:put sounds "fire"   "Hand Clap"
+  table:put sounds "noammo" "Cowbell"
+  table:put sounds "shot"   "Acoustic Snare"
+  table:put sounds "kill"   "Electric Snare"
+end
+
+to load-map
+  ask patches [
+    set pcolor (random 3) - 5 + green
+  ]
 end
 
 to show-crosshair
@@ -411,6 +411,27 @@ Polygon -7500403 true false 195 210 165 150 165 210 195 210
 Rectangle -7500403 true false 165 210 195 268
 Rectangle -7500403 true false 105 210 135 268
 Polygon -7500403 true false 105 210 135 150 135 210 105 210
+
+explosion-decay
+false
+0
+Circle -2674135 true false 2 2 295
+Circle -955883 true false 75 75 148
+
+explosion-kill
+false
+0
+Circle -6459832 true false 2 2 297
+Circle -2674135 true false 30 30 240
+Circle -955883 true false 60 60 180
+Circle -1184463 true false 90 90 120
+
+explosion-shot
+false
+0
+Circle -2674135 true false 0 0 300
+Circle -955883 true false 45 45 210
+Circle -1184463 true false 90 90 120
 
 tank
 true

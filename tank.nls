@@ -18,6 +18,10 @@ tanks-own [
   team
 ]
 
+;; ==========
+;; Procedures
+;; ==========
+
 to spawn-tank [tank-team]
   create-tanks 1 [
     set-tank-vars tank-team false
@@ -83,12 +87,16 @@ to tank-facexy [txcor tycor]
 end
 
 to fire
-  if ammunition > 0 and fire-cool-down = 0 [
-    debug "FIRE" (word who " (" ammunition " left)")
-    set ammunition ammunition - 1
+  if fire-cool-down = 0 [
+    ifelse ammunition > 0 [
+      debug "FIRE" (word who " (" ammunition " left)")
+      set ammunition ammunition - 1
+      fire-bullet
+      play-sound "fire"
+    ] [
+      play-sound "noammo"
+    ]
     set fire-cool-down max-fire-rate
-    fire-bullet
-    play-sound "fire"
   ]
 end
 
@@ -96,15 +104,17 @@ to shot-at
   debug "SHOT" (word who " by " ([shooter] of myself))
   set armor armor - 1
   ifelse armor = 0 [
+    explode "kill"
+    play-sound "kill"
     kill-tank
   ] [
-    play-sound (word "shot " get-tank-affiliation)
+    explode "shot"
+    play-sound "shot"
   ]
 end
 
 to kill-tank
   debug "KILL" (word who " by " ([shooter] of myself))
-  play-sound (word "kill " get-tank-affiliation)
   if is-player? [
     set player-deaths player-deaths + 1
   ]
@@ -113,6 +123,10 @@ to kill-tank
   ]
   die
 end
+
+;; =========
+;; Reporters
+;; =========
 
 to-report get-tank-affiliation
   if is-player? [ report "player" ]
