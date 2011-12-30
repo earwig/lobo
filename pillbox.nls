@@ -1,0 +1,117 @@
+;; lobo: Logo Bolo
+;; (c) Ben Kurtovic, 2011
+
+globals [
+  pill-anger-range
+  pill-max-armor
+]
+
+breed [pillboxes pillbox]
+
+pillboxes-own [
+  alive?
+  anger
+  armor
+  last-fire-time
+  team
+]
+
+;; ==========
+;; Procedures
+;; ==========
+
+to spawn-pillbox [pill-xcor pill-ycor]
+  create-pillboxes 1 [
+    set-pill-vars (first pill-anger-range) pill-max-armor -1 pill-xcor pill-ycor
+  ]
+end
+
+to set-pill-vars [p-anger p-armor p-team p-xcor p-ycor]
+  set alive? true
+  set anger p-anger
+  set armor p-armor
+  set last-fire-time timer
+  set team p-team
+
+  set color get-pill-color
+  set shape "pillbox-alive"
+  set size 1.1
+  setxy p-xcor p-ycor
+end
+
+to do-pill-logic
+  set label armor
+  ifelse alive? [
+    if timer - last-fire-time > anger [
+      let targets tanks in-radius 9
+      if any? targets [
+        let target min-one-of targets [distancexy [xcor] of myself [ycor] of myself]
+        face target
+        fire-bullet 9
+        set last-fire-time timer
+      ]
+    ]
+    relax
+  ] [
+    if any? tanks-here [
+      pickup-pill
+    ]
+  ]
+end
+
+to pill-shot-at
+  set armor armor - 1
+  ifelse armor = 0 [
+    debug who "PILL-KILL" (word "by " ([shooter] of myself))
+    explode "large"
+    play-sound "kill"
+    set alive? false
+    set shape "pillbox-dead"
+  ] [
+    debug who "PILL-SHOT" (word "by " ([shooter] of myself))
+    explode "medium"
+    play-sound "shot"
+    enrage
+  ]
+end
+
+to relax
+  let min-anger first pill-anger-range
+  set anger anger + 0.00025
+  if anger > min-anger [
+    set anger min-anger
+  ]
+end
+
+to enrage
+  let max-anger last pill-anger-range
+  set anger anger - 0.2
+  if anger < max-anger [
+    set anger max-anger
+  ]
+end
+
+to pickup-pill
+  ask one-of tanks-here [
+    debug ([who] of myself) "PILL-TAKE" (word "by " who)
+    set number-of-pills number-of-pills + 1
+  ]
+  play-sound "pickup"
+  die
+end
+
+;; =========
+;; Reporters
+;; =========
+
+to-report get-pill-afiliation
+  if team = -1 [ report "neutral" ]
+  if team = 0  [ report "ally"    ]
+  report "enemy"
+end
+
+to-report get-pill-color
+  let affiliation get-base-afiliation
+  if affiliation = "ally" [ report green ]
+  report red
+end

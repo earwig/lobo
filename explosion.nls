@@ -2,7 +2,7 @@
 ;; (c) Ben Kurtovic, 2011
 
 globals [
-  explodes
+  explosions-table
 ]
 
 breed [explosions explosion]
@@ -19,19 +19,22 @@ explosions-own [
 
 to make-explosions-table
   ; Fun with particle effects!
-  set explodes table:make
-  table:put explodes "decay" [["explosion-decay" 0.65 10  0.5]]
-  table:put explodes "shot"  [["explosion-shot"  1.25 10  0.5]]
-  table:put explodes "kill"  [["explosion-kill"  3    20  0.5] ["explosion-shot"  1.25 15  1]
-                              ["explosion-shot"  1.25 15  1  ] ["explosion-shot"  1.25 10  1]
-                              ["explosion-shot"  1.25 10  1  ] ["explosion-decay" 0.65 10  2]
-                              ["explosion-decay" 0.65 10  2  ] ["explosion-decay" 0.65 8   2] 
-                              ["explosion-decay" 0.65 7   2  ] ["explosion-decay" 0.65 5   3] 
-                              ["explosion-decay" 0.65 5   3  ]]
+  set explosions-table table:make
+  table:put explosions-table "small"  [["explosion-small" 0.65 10  0.5]]
+  table:put explosions-table "medium" [["explosion-med"   1.25 10  0.5]]
+  table:put explosions-table "large"  [["explosion-large" 2.5  15  0.5] ["explosion-med"   1.25 10  1]
+                                       ["explosion-med"   1.1  8   1  ] ["explosion-small" 0.65 7   2]
+                                       ["explosion-small" 0.65 5   3  ]]
+  table:put explosions-table "huge"   [["explosion-large" 3    20  0.5] ["explosion-med"   1.25 15  1]
+                                       ["explosion-med"   1.25 15  1  ] ["explosion-med"   1.25 10  1]
+                                       ["explosion-med"   1.25 10  1  ] ["explosion-small" 0.65 10  2]
+                                       ["explosion-small" 0.65 10  2  ] ["explosion-small" 0.65 8   2] 
+                                       ["explosion-small" 0.65 7   2  ] ["explosion-small" 0.65 5   3] 
+                                       ["explosion-small" 0.65 5   3  ]]
 end
 
 to explode [name]
-  let data table:get explodes name
+  let data table:get explosions-table name
   foreach data [
     create-explosion ?
   ]

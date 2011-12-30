@@ -62,33 +62,33 @@ to do-base-logic
 end
 
 to claim-base [claimer]
-  debug who "BASE-CLAIM" (word "by " ([who] of claimer) ": " team " -> " [team] of claimer)
+  debug who "BASE-TAKE" (word "by " ([who] of claimer) ": " team " -> " [team] of claimer)
   set team [team] of claimer
   set color get-base-color
+  set last-armor-regen timer  ; Don't regenerate armor right after being claimed
 end
 
 to refuel-tank [tank-to-refuel]
-  let did-armor-refuel? false
-  let did-ammo-refuel? false
   let time-since-last-refuel timer - last-refuel
-
   ask tank-to-refuel [
-    if armor < tank-max-armor and ([armor] of myself) > 1 and time-since-last-refuel > 25 / max-fps [  ; 25 frames
-      set armor armor + 1
-      set did-armor-refuel? true
-    ]
-    if ammunition < tank-max-ammo and ([ammunition] of myself) > 1 and time-since-last-refuel > 10 / max-fps [  ; 10 frames
-      set ammunition ammunition + 1
-      set did-ammo-refuel? true
-    ]
-  ]
-
-  if did-armor-refuel? or did-ammo-refuel? [
-    set last-refuel timer
-    ifelse did-armor-refuel? [
-      set armor armor - 1
+    ifelse armor < tank-max-armor and ([armor] of myself) > 1 [
+      if time-since-last-refuel > 25 / max-fps [  ; 25 frames
+        set armor armor + 1
+        ask myself [
+          set armor armor - 1
+          set last-refuel timer
+        ]
+      ]
     ] [
-      set ammunition ammunition - 1
+      if ammunition < tank-max-ammo and ([ammunition] of myself) > 1 [
+        if time-since-last-refuel > 10 / max-fps [  ; 10 frames
+          set ammunition ammunition + 1
+          ask myself [
+            set ammunition ammunition - 1
+            set last-refuel timer
+          ]
+        ]
+      ]
     ]
   ]
 end
@@ -97,11 +97,11 @@ to regenerate
   let time-since-last-ammo-regen timer - last-ammo-regen
   let time-since-last-armor-regen timer - last-armor-regen
 
-  if ammunition < base-max-ammo and time-since-last-ammo-regen > 10 [
+  if ammunition < base-max-ammo and time-since-last-ammo-regen > 6 [
     set ammunition ammunition + 1
     set last-ammo-regen timer
   ]
-  if armor < base-max-armor and time-since-last-armor-regen > 25 [
+  if armor < base-max-armor and time-since-last-armor-regen > 15 [
     set armor armor + 1
     set last-armor-regen timer 
   ]
@@ -109,13 +109,14 @@ end
 
 to base-shot-at
   set armor armor - 1
+  set last-armor-regen timer  ; Don't regenerate armor right after being shot
   ifelse armor > 0 [
     debug who "BASE-SHOT" (word "by " ([shooter] of myself))
-    explode "decay"
+    explode "small"
     play-sound "shot"
   ] [
     debug who "BASE-KILL" (word "by " ([shooter] of myself))
-    explode "shot"
+    explode "medium"
     play-sound "kill"
   ]
 end

@@ -4,9 +4,12 @@
 breed [bullets bullet]
 
 bullets-own [
+  is-shooter-player?
+  is-shooter-tank?
   max-travel-distance
   shooter
   speed
+  team-of-shooter
   travel-distance
 ]
 
@@ -14,14 +17,24 @@ bullets-own [
 ;; Procedures
 ;; ==========
 
-to fire-bullet
+to fire-bullet [dist]
   hatch-bullets 1 [
-    set max-travel-distance 8
+    set max-travel-distance dist
+    set is-shooter-player? false
+    set is-shooter-tank? false
+    if [breed] of myself = tanks [
+      if [is-player?] of myself [
+        set is-shooter-player? true
+      ]
+      set is-shooter-tank? true
+    ]
     set shooter [who] of myself
     set speed 1
+    set team-of-shooter [team] of myself
     set travel-distance 0
 
     set color white
+    set label ""
     set shape "bullet"
     set size 0.5
 
@@ -34,30 +47,30 @@ end
 to do-bullet-logic
   fd speed
   set travel-distance travel-distance + speed
-  if travel-distance > max-travel-distance [
-    explode "decay"
+  if travel-distance >= max-travel-distance [
+    explode "small"
     die
   ]
 
   let mxcor xcor
   let mycor ycor
-  let is-close-enough false
-  let shootable-bases-here bases-here with [armor > 0 and team != -1 and team != [team] of tank [shooter] of myself]
-  let targets (turtle-set tanks-here shootable-bases-here)
+  let shootable-pills-here pillboxes-here with [alive? = true]
+  let targets (turtle-set tanks-here shootable-pills-here)
+  if is-shooter-tank? [  ; Only tanks can shoot at bases
+    let shootable-bases-here bases-here with [armor > 0 and team != -1 and team != team-of-shooter]
+    set targets (turtle-set targets shootable-bases-here)
+  ]
   let target min-one-of targets [distancexy mxcor mycor]
   if target != nobody [
     ask target [
       if distancexy mxcor mycor < 0.65 [
-        set is-close-enough true
-        ifelse breed = tanks [
-          tank-shot-at
-        ] [
-          base-shot-at
+        if breed = tanks     [ tank-shot-at ]
+        if breed = pillboxes [ pill-shot-at ]
+        if breed = bases     [ base-shot-at ]
+        ask myself [
+          die
         ]
       ]
     ]
-  ]
-  if is-close-enough [
-    die
   ]
 end

@@ -19,6 +19,7 @@ tanks-own [
   max-fire-rate
   max-speed
   max-turn
+  number-of-pills
   speed
   team
 ]
@@ -44,6 +45,7 @@ to set-tank-vars [player? tteam txcor tycor theading]
   set max-fire-rate 7
   set max-speed 0.25
   set max-turn 24
+  set number-of-pills 0
   set speed 0
   set team tteam
 
@@ -95,9 +97,9 @@ end
 to fire
   if fire-cool-down = 0 [
     ifelse ammunition > 0 [
-      debug who "TANK-FIRE" (word ammunition " left")
+      debug who "TANK-FIRE" (word (ammunition - 1) " left")
       set ammunition ammunition - 1
-      fire-bullet
+      fire-bullet 8
       play-sound "fire"
     ] [
       play-sound "noammo"
@@ -107,26 +109,26 @@ to fire
 end
 
 to tank-shot-at
-  debug who "TANK-SHOT" (word "by " ([shooter] of myself))
   set armor armor - 1
   ifelse armor = 0 [
-    explode "kill"
+    debug who "TANK-KILL" (word "by " ([shooter] of myself))
+    explode "huge"
     play-sound "kill"
     kill-tank
   ] [
-    explode "shot"
+    debug who "TANK-SHOT" (word "by " ([shooter] of myself))
+    explode "medium"
     play-sound "shot"
   ]
 end
 
 to kill-tank
-  debug who "TANK-KILL" (word "by " ([shooter] of myself))
   if is-player? [
     set player-deaths player-deaths + 1
   ]
-  if [is-player?] of (turtle [shooter] of myself) [
-    set player-kills player-kills + 1
-  ]
+  if [is-shooter-player?] of myself [
+      set player-kills player-kills + 1
+    ]
   die
 end
 

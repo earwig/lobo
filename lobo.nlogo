@@ -8,6 +8,7 @@ __includes [
   "base.nls"
   "bullet.nls"
   "explosion.nls"
+  "pillbox.nls"
   "player.nls"
   "tank.nls"
 ]
@@ -38,19 +39,21 @@ to setup
   spawn-player 0 0 0
   spawn-tank 0 -6 0 90
   spawn-tank 1 6 0 270
-  ;spawn-base -3 -7
   spawn-base 0 -7
-  ;spawn-base 3 -7
+  spawn-pillbox 6 6
   render
   set last-tick-time timer
 end
 
 to go
   ask player [
-    do-player-logic
+      do-player-logic
   ]
   ask tanks [
     do-tank-logic
+  ]
+  ask pillboxes [
+    do-pill-logic
   ]
   ask bases [
     do-base-logic
@@ -61,7 +64,8 @@ to go
   ask explosions [
     keep-exploding
   ]
-  show-crosshair
+  show-crosshairs
+  show-hud
   render
   keep-time
 end
@@ -102,14 +106,17 @@ to setup-defaults
   set tank-max-armor 8
   set base-max-ammo 50
   set base-max-armor 20
+  set pill-anger-range [1.2 0.2]
+  set pill-max-armor 8
 end
 
 to make-sounds-table
   set sounds table:make
   table:put sounds "fire"   "Hand Clap"
-  table:put sounds "noammo" "Cowbell"
-  table:put sounds "shot"   "Acoustic Snare"
   table:put sounds "kill"   "Electric Snare"
+  table:put sounds "noammo" "Cowbell"
+  table:put sounds "pickup" "Hi Bongo"
+  table:put sounds "shot"   "Acoustic Snare"
 end
 
 to load-map
@@ -118,7 +125,7 @@ to load-map
   ]
 end
 
-to show-crosshair
+to show-crosshairs
   clear-drawing
   if mouse-inside? [
     ask patch mouse-xcor mouse-ycor [
@@ -149,6 +156,9 @@ to draw-border [b-color b-thickness]
     fd 0.5
     die
   ]
+end
+
+to show-hud
 end
 
 to render
@@ -359,6 +369,55 @@ C
 NIL
 NIL
 
+BUTTON
+109
+536
+368
+569
+NIL
+ask one-of bases [claim-base tank 2]
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+
+MONITOR
+160
+412
+259
+461
+Player's Pills
+[number-of-pills] of player
+17
+1
+12
+
+MONITOR
+261
+584
+357
+629
+Pillbox Anger
+[anger] of pillbox 4
+6
+1
+11
+
+MONITOR
+148
+584
+246
+629
+Pillbox Armor
+[armor] of pillbox 4
+17
+1
+11
+
 @#$#@#$#@
 WHAT IS IT?
 -----------
@@ -456,13 +515,7 @@ Rectangle -7500403 true false 165 210 195 268
 Rectangle -7500403 true false 105 210 135 268
 Polygon -7500403 true false 105 210 135 150 135 210 105 210
 
-explosion-decay
-false
-0
-Circle -2674135 true false 2 2 295
-Circle -955883 true false 75 75 148
-
-explosion-kill
+explosion-large
 false
 0
 Circle -6459832 true false 2 2 297
@@ -470,12 +523,47 @@ Circle -2674135 true false 30 30 240
 Circle -955883 true false 60 60 180
 Circle -1184463 true false 90 90 120
 
-explosion-shot
+explosion-med
 false
 0
 Circle -2674135 true false 0 0 300
 Circle -955883 true false 45 45 210
 Circle -1184463 true false 90 90 120
+
+explosion-small
+false
+0
+Circle -2674135 true false 2 2 295
+Circle -955883 true false 75 75 148
+
+pillbox-alive
+false
+1
+Polygon -2674135 true true 270 240 270 270 240 270 180 210 210 180 270 240
+Rectangle -2674135 true true 225 135 300 165
+Rectangle -2674135 true true 135 0 165 75
+Rectangle -2674135 true true 0 135 75 165
+Rectangle -2674135 true true 135 225 165 300
+Polygon -2674135 true true 240 30 270 30 270 60 210 120 180 90 240 30
+Polygon -2674135 true true 30 60 30 30 60 30 120 90 90 120 30 60
+Polygon -2674135 true true 60 270 30 270 30 240 90 180 120 210 60 270
+Circle -7500403 true false 45 45 210
+
+pillbox-dead
+false
+1
+Polygon -7500403 true false 240 30 270 30 270 60 240 90 210 60 240 30
+Rectangle -7500403 true false 135 0 165 45
+Rectangle -7500403 true false 0 135 45 165
+Rectangle -7500403 true false 135 255 165 300
+Rectangle -7500403 true false 255 135 300 165
+Polygon -7500403 true false 30 60 30 30 60 30 90 60 60 90 30 60
+Polygon -7500403 true false 60 270 30 270 30 240 60 210 90 240 60 270
+Polygon -7500403 true false 270 240 270 270 240 270 210 240 240 210 270 240
+Polygon -2674135 true true 195 165 210 180 210 180 210 210 180 210 165 195
+Polygon -2674135 true true 165 105 180 90 180 90 210 90 210 120 195 135
+Polygon -2674135 true true 105 135 90 120 90 120 90 90 120 90 135 105
+Polygon -2674135 true true 135 195 120 210 120 210 90 210 90 180 105 165
 
 tank
 true
