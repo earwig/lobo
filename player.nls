@@ -54,6 +54,18 @@ to do-player-logic
   ]
 end
 
+to player-place-pill
+  ask player [
+    ifelse number-of-pills > 0 [
+      set number-of-pills number-of-pills - 1
+      hatch-pillbox
+      play-sound "place"
+    ] [
+      play-sound "nopill"
+    ]
+  ]
+end
+
 to cancel-order
   if player-has-target? [
     cancel-target

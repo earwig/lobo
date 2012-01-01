@@ -1,18 +1,15 @@
 ;; lobo: Logo Bolo
 ;; (c) Ben Kurtovic, 2011
 
-globals [
-  pill-anger-range
-  pill-max-armor
-]
-
 breed [pillboxes pillbox]
 
 pillboxes-own [
   alive?
   anger
+  anger-range
   armor
   last-fire-time
+  max-armor
   team
 ]
 
@@ -22,33 +19,40 @@ pillboxes-own [
 
 to spawn-pillbox [pill-xcor pill-ycor]
   create-pillboxes 1 [
-    set-pill-vars (first pill-anger-range) pill-max-armor -1 pill-xcor pill-ycor
+    set-pill-vars -1
+    setxy pill-xcor pill-ycor
   ]
 end
 
-to set-pill-vars [p-anger p-armor p-team p-xcor p-ycor]
+to hatch-pillbox
+  hatch 1 [
+    debug who "PILL-HATCH" (word "by " ([who] of myself))
+    set breed pillboxes
+    set-pill-vars [team] of myself
+  ]
+end
+
+to set-pill-vars [p-team]
   set alive? true
-  set anger p-anger
-  set armor p-armor
+  set anger 1.2
+  set anger-range [1.2 0.2]
+  set armor 8
   set last-fire-time timer
+  set max-armor 8
   set team p-team
 
   set color get-pill-color
   set shape "pillbox-alive"
   set size 1.1
-  setxy p-xcor p-ycor
 end
 
 to do-pill-logic
   set label armor
   ifelse alive? [
     if timer - last-fire-time > anger [
-      let targets tanks in-radius 9
+      let targets tanks with [team != [team] of myself] in-radius 9
       if any? targets [
-        let target min-one-of targets [distancexy [xcor] of myself [ycor] of myself]
-        face target
-        fire-bullet 9
-        set last-fire-time timer
+        pill-fire-at min-one-of targets [distancexy [xcor] of myself [ycor] of myself]
       ]
     ]
     relax
@@ -57,6 +61,14 @@ to do-pill-logic
       pickup-pill
     ]
   ]
+end
+
+to pill-fire-at [target]
+  debug who "PILL-FIRE" (word "at " [who] of target)
+  face target
+  play-sound "fire"
+  fire-bullet 9
+  set last-fire-time timer
 end
 
 to pill-shot-at
@@ -76,7 +88,7 @@ to pill-shot-at
 end
 
 to relax
-  let min-anger first pill-anger-range
+  let min-anger first anger-range
   set anger anger + 0.00025
   if anger > min-anger [
     set anger min-anger
@@ -84,7 +96,7 @@ to relax
 end
 
 to enrage
-  let max-anger last pill-anger-range
+  let max-anger last anger-range
   set anger anger - 0.2
   if anger < max-anger [
     set anger max-anger

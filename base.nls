@@ -1,11 +1,6 @@
 ;; lobo: Logo Bolo
 ;; (c) Ben Kurtovic, 2011
 
-globals [
-  base-max-ammo
-  base-max-armor
-]
-
 breed [bases base]
 
 bases-own [
@@ -14,6 +9,8 @@ bases-own [
   last-ammo-regen
   last-armor-regen
   last-refuel
+  max-ammo
+  max-armor
   team
 ]
 
@@ -23,17 +20,19 @@ bases-own [
 
 to spawn-base [base-xcor base-ycor]
   create-bases 1 [
-    set-base-vars base-max-ammo base-max-armor -1 base-xcor base-ycor
+    set-base-vars 50 20 -1 base-xcor base-ycor
   ]
 end
 
 to set-base-vars [b-ammo b-armor b-team b-xcor b-ycor]
   set ammunition b-ammo
   set armor b-armor
-  set team b-team
   set last-ammo-regen timer
   set last-armor-regen timer
   set last-refuel timer
+  set max-ammo b-armor
+  set max-armor b-armor
+  set team b-team
 
   set color get-base-color
   set shape "base"
@@ -71,7 +70,7 @@ end
 to refuel-tank [tank-to-refuel]
   let time-since-last-refuel timer - last-refuel
   ask tank-to-refuel [
-    ifelse armor < tank-max-armor and ([armor] of myself) > 1 [
+    ifelse armor < max-armor and ([armor] of myself) > 1 [
       if time-since-last-refuel > 25 / max-fps [  ; 25 frames
         set armor armor + 1
         ask myself [
@@ -80,7 +79,7 @@ to refuel-tank [tank-to-refuel]
         ]
       ]
     ] [
-      if ammunition < tank-max-ammo and ([ammunition] of myself) > 1 [
+      if ammunition < max-ammo and ([ammunition] of myself) > 1 [
         if time-since-last-refuel > 10 / max-fps [  ; 10 frames
           set ammunition ammunition + 1
           ask myself [
@@ -97,11 +96,11 @@ to regenerate
   let time-since-last-ammo-regen timer - last-ammo-regen
   let time-since-last-armor-regen timer - last-armor-regen
 
-  if ammunition < base-max-ammo and time-since-last-ammo-regen > 6 [
+  if ammunition < max-ammo and time-since-last-ammo-regen > 6 [
     set ammunition ammunition + 1
     set last-ammo-regen timer
   ]
-  if armor < base-max-armor and time-since-last-armor-regen > 15 [
+  if armor < max-armor and time-since-last-armor-regen > 15 [
     set armor armor + 1
     set last-armor-regen timer 
   ]

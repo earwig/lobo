@@ -47,7 +47,7 @@ end
 
 to go
   ask player [
-      do-player-logic
+    do-player-logic
   ]
   ask tanks [
     do-tank-logic
@@ -89,12 +89,12 @@ end
 to debug [agent action msg]
   ; Comment this and remove the output box
   ; to turn off debugging info:
-  output-print (word (round timer) ": " agent ": " action " (" msg ")")
+  print (word (round timer) ": " agent ": " action " (" msg ")")
 end
 
 to setup-defaults
-  set-patch-size 30
-  resize-world -8 8 -8 8
+  set-patch-size 20
+  resize-world -17 17 -12 12
   set max-fps 30
   set mouse-was-down? false
   set player-deaths 0
@@ -102,12 +102,6 @@ to setup-defaults
   set player-kills 0
   set player-target-xcor 0
   set player-target-ycor 0
-  set tank-max-ammo 24
-  set tank-max-armor 8
-  set base-max-ammo 50
-  set base-max-armor 20
-  set pill-anger-range [1.2 0.2]
-  set pill-max-armor 8
 end
 
 to make-sounds-table
@@ -117,6 +111,8 @@ to make-sounds-table
   table:put sounds "noammo" "Cowbell"
   table:put sounds "pickup" "Hi Bongo"
   table:put sounds "shot"   "Acoustic Snare"
+  table:put sounds "place"  "Vibraslap"
+  table:put sounds "nopill" "Cowbell"
 end
 
 to load-map
@@ -159,6 +155,21 @@ to draw-border [b-color b-thickness]
 end
 
 to show-hud
+  ask patch (max-pxcor - 1) (max-pycor - 1) [
+    set plabel (word "Armor: " [armor] of player)
+  ]
+  ask patch (max-pxcor - 1) (max-pycor - 2) [
+    set plabel (word "Ammo: " [ammunition] of player)
+  ]
+  ask patch (max-pxcor - 1) (max-pycor - 3) [
+    set plabel (word "Pillboxes: " [number-of-pills] of player)
+  ]
+  ask patch (max-pxcor - 1) (min-pycor + 2) [
+    set plabel (word "Deaths: " player-deaths)
+  ]
+  ask patch (max-pxcor - 1) (min-pycor + 1) [
+    set plabel (word "Kills: " player-kills)
+  ]
 end
 
 to render
@@ -177,7 +188,7 @@ end
 to play-sound [name]
   if enable-sound? [
     let dist distancexy ([xcor] of player) ([ycor] of player)
-    let volume 127 - (dist * 4)
+    let volume 127 - (dist * 8)
     if volume > 0 [
       sound:play-drum (table:get sounds name) volume
     ]
@@ -185,36 +196,36 @@ to play-sound [name]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-452
+254
 10
-972
-551
-8
-8
-30.0
+964
+541
+17
+12
+20.0
 1
-10
+12
 1
 1
 1
 0
+0
+0
 1
-1
-1
--8
-8
--8
-8
+-17
+17
+-12
+12
 0
 0
 1
 frames
 
 BUTTON
-43
-100
-138
-133
+19
+143
+114
+176
 New Game
 setup
 NIL
@@ -227,10 +238,10 @@ NIL
 NIL
 
 BUTTON
-290
-99
-384
-132
+129
+143
+223
+176
 Play Game
 go
 T
@@ -242,23 +253,12 @@ G
 NIL
 NIL
 
-MONITOR
-269
-290
-389
-339
-Player Speed
-[speed] of player
-8
-1
-12
-
 BUTTON
-109
-172
-230
+21
+208
 224
-FIRE!
+255
+Fire!
 player-fire
 NIL
 1
@@ -269,95 +269,22 @@ F
 NIL
 NIL
 
-MONITOR
-270
-350
-389
-399
-Player Has Target?
-player-has-target?
-5
-1
-12
-
-OUTPUT
-1012
-10
-1500
-557
-12
-
-MONITOR
-55
-290
-149
-339
-Player Deaths
-player-deaths
-17
-1
-12
-
-MONITOR
-55
-350
-148
-399
-Player Kills
-player-kills
-17
-1
-12
-
-MONITOR
-160
-290
-261
-339
-Player Ammo
-[ammunition] of player
-17
-1
-12
-
-MONITOR
-160
-350
-260
-399
-Player Armor
-[armor] of player
-17
-1
-12
-
 SWITCH
-264
-179
-394
-212
+50
+97
+186
+130
 enable-sound?
 enable-sound?
 0
 1
 -1000
 
-MONITOR
-272
-411
-390
-460
-Player Target
-word \"(\" player-target-xcor \", \" player-target-ycor \")\"
-10
-1
-12
-
 BUTTON
-109
-235
-230
-268
+22
+308
+225
+341
 Cancel Order
 player-cancel-order
 NIL
@@ -369,54 +296,61 @@ C
 NIL
 NIL
 
+TEXTBOX
+16
+14
+303
+53
+LoBo: Logo Bolo
+28
+0.0
+1
+
+TEXTBOX
+41
+53
+304
+87
+a game by Ben Kurtovic
+14
+0.0
+1
+
+TEXTBOX
+19
+75
+241
+93
+---------------------------------
+11
+0.0
+1
+
+TEXTBOX
+21
+185
+262
+213
+---------------------------------
+11
+0.0
+1
+
 BUTTON
-109
-536
-368
-569
-NIL
-ask one-of bases [claim-base tank 2]
+22
+265
+225
+298
+Place Pill
+player-place-pill
 NIL
 1
 T
 OBSERVER
 NIL
+P
 NIL
 NIL
-NIL
-
-MONITOR
-160
-412
-259
-461
-Player's Pills
-[number-of-pills] of player
-17
-1
-12
-
-MONITOR
-261
-584
-357
-629
-Pillbox Anger
-[anger] of pillbox 4
-6
-1
-11
-
-MONITOR
-148
-584
-246
-629
-Pillbox Armor
-[armor] of pillbox 4
-17
-1
-11
 
 @#$#@#$#@
 WHAT IS IT?
@@ -560,10 +494,10 @@ Rectangle -7500403 true false 255 135 300 165
 Polygon -7500403 true false 30 60 30 30 60 30 90 60 60 90 30 60
 Polygon -7500403 true false 60 270 30 270 30 240 60 210 90 240 60 270
 Polygon -7500403 true false 270 240 270 270 240 270 210 240 240 210 270 240
-Polygon -2674135 true true 195 165 210 180 210 180 210 210 180 210 165 195
-Polygon -2674135 true true 165 105 180 90 180 90 210 90 210 120 195 135
-Polygon -2674135 true true 105 135 90 120 90 120 90 90 120 90 135 105
-Polygon -2674135 true true 135 195 120 210 120 210 90 210 90 180 105 165
+Polygon -2674135 true true 195 165 210 180 210 210 180 210 165 195
+Polygon -2674135 true true 165 105 180 90 210 90 210 120 195 135
+Polygon -2674135 true true 105 135 90 120 90 90 120 90 135 105
+Polygon -2674135 true true 135 195 120 210 90 210 90 180 105 165
 
 tank
 true
