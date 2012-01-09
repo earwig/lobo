@@ -18,13 +18,13 @@ bases-own [
 ;; Procedures
 ;; ==========
 
-to spawn-base [base-xcor base-ycor]
-  create-bases 1 [
-    set-base-vars 50 20 -1 base-xcor base-ycor
+to spawn-base
+  sprout-bases 1 [
+    set-base-vars 50 20 -1
   ]
 end
 
-to set-base-vars [b-ammo b-armor b-team b-xcor b-ycor]
+to set-base-vars [b-ammo b-armor b-team]
   set ammunition b-ammo
   set armor b-armor
   set last-ammo-regen timer
@@ -37,7 +37,6 @@ to set-base-vars [b-ammo b-armor b-team b-xcor b-ycor]
   set color get-base-color
   set shape "base"
   set size 1.15
-  setxy b-xcor b-ycor
 end
 
 to do-base-logic
@@ -57,7 +56,6 @@ to do-base-logic
     ]
   ]
   regenerate
-  set label armor
 end
 
 to claim-base [claimer]

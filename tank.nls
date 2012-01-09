@@ -33,7 +33,7 @@ end
 
 to set-tank-vars [player? tteam txcor tycor theading]
   set acceleration 0.03
-  set ammunition 20
+  set ammunition 4
   set armor 8
   set fire-cool-down 0
   set friction 0.0075
@@ -59,7 +59,7 @@ to do-tank-logic
   if is-accelerating? [
     accelerate acceleration
   ]
-  fd speed
+  fd speed * ground-friction
   decelerate friction
   if fire-cool-down > 0 [
     set fire-cool-down fire-cool-down - 1
@@ -98,7 +98,7 @@ to fire
     ifelse ammunition > 0 [
       debug who "TANK-FIRE" (word (ammunition - 1) " left")
       set ammunition ammunition - 1
-      fire-bullet 8
+      fire-bullet 5
       play-sound "fire"
     ] [
       play-sound "noammo"

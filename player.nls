@@ -26,6 +26,9 @@ to do-player-logic
   ifelse player = nobody [
     if timer - player-death-time > 1.5 [
       spawn-player 0 0 0
+      ask player [
+        play-sound "spawn"
+      ]
     ]
   ] [
     ask player [

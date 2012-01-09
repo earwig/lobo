@@ -27,6 +27,11 @@ globals [
   sounds
 ]
 
+patches-own [
+  ground-type
+  ground-friction
+]
+
 ;; ===========================
 ;; Button-initiated procedures
 ;; ===========================
@@ -39,10 +44,10 @@ to setup
   make-explosions-table
   load-map
   spawn-player 0 0 0
-  spawn-tank 0 -6 0 90
-  spawn-tank 1 6 0 270
-  spawn-base 0 -7
-  spawn-pillbox 6 6
+  ;spawn-tank 0 -6 0 90
+  ;spawn-tank 1 6 0 270
+  ;spawn-base 0 -7
+  ;spawn-pillbox 6 6
   show-hud
   render
 end
@@ -75,9 +80,12 @@ end
 ;; Other procedures
 ;; ================
 
+to startup
+  setup
+end
+
 to debug [agent action msg]
-  ; Comment this and remove the output box
-  ; to turn off debugging info:
+  ; Comment this to turn off debugging info:
   print (word (round timer) ": " agent ": " action " (" msg ")")
 end
 
@@ -86,6 +94,7 @@ to setup-defaults
   resize-world -17 17 -12 12
   set last-sound-time timer
   set last-tick-time timer
+  set map-file "lobo-default-map.png"
   set max-fps 30
   set mouse-was-down? false
   set sound-stopped? true
@@ -106,11 +115,46 @@ to make-sounds-table
   table:put sounds "shot"   "Acoustic Snare"
   table:put sounds "place"  "Vibraslap"
   table:put sounds "nopill" "Cowbell"
+  table:put sounds "spawn"  "Open Hi Conga"
 end
 
 to load-map
+  import-pcolors-rgb map-file
   ask patches [
-    set pcolor (random 3) - 5 + green
+    ifelse pcolor = [0 0 0] [
+      set pcolor black
+      set ground-type "road"
+      set ground-friction 1.15
+    ] [
+      ifelse pcolor = [0 128 0] [
+        set pcolor lime - 4
+        set ground-type "forest"
+        set ground-friction 0.5
+      ] [
+        ifelse pcolor = [0 255 0] [
+          set pcolor lime - 2
+          set ground-type "grass"
+          set ground-friction 0.75
+        ] [
+          ifelse pcolor = [255 255 0] [
+            set pcolor black
+            set ground-type "road"
+            set ground-friction 1.15
+            spawn-base
+          ] [
+            ifelse pcolor = [255 0 0] [
+              set pcolor lime - 4
+              set ground-type "forest"
+              set ground-friction 0.5
+              spawn-pillbox
+            ] [
+              debug (word "(" pxcor ", " pycor ")") "PATCH-LOAD-FAILURE" (word "unknown color: " pcolor)
+              set pcolor red
+            ]
+          ]
+        ]
+      ]
+    ]
   ]
 end
 
@@ -158,13 +202,13 @@ to show-hud
     set num-pills [number-of-pills] of player
   ]
 
-  ask patch (max-pxcor - 1) (max-pycor - 1) [
+  ask patch (min-pxcor + 4) max-pycor [
     set plabel (word "Armor: " player-armor)
   ]
-  ask patch (max-pxcor - 1) (max-pycor - 2) [
+  ask patch (min-pxcor + 12) max-pycor [
     set plabel (word "Ammo: " player-ammo)
   ]
-  ask patch (max-pxcor - 1) (max-pycor - 3) [
+  ask patch (max-pxcor - 1) max-pycor [
     set plabel (word "Pillboxes: " num-pills)
   ]
   ask patch (max-pxcor - 1) (min-pycor + 2) [
@@ -241,10 +285,10 @@ GRAPHICS-WINDOW
 frames
 
 BUTTON
-19
-179
-114
-212
+20
+270
+115
+303
 New Game
 setup
 NIL
@@ -257,10 +301,10 @@ NIL
 NIL
 
 BUTTON
-129
-179
-223
-212
+130
+270
+224
+303
 Play Game
 go
 T
@@ -273,10 +317,10 @@ NIL
 NIL
 
 BUTTON
-21
-244
-224
-291
+22
+335
+225
+382
 Fire!
 player-fire
 NIL
@@ -300,10 +344,10 @@ enable-sound?
 -1000
 
 BUTTON
-22
-344
-225
-377
+23
+435
+226
+468
 Cancel Order
 player-cancel-order
 NIL
@@ -346,20 +390,20 @@ TEXTBOX
 1
 
 TEXTBOX
-21
-221
-262
-249
+22
+312
+263
+340
 ---------------------------------
 11
 0.0
 1
 
 BUTTON
-22
-301
-225
-334
+23
+392
+226
+425
 Place Pill
 player-place-pill
 NIL
@@ -372,10 +416,10 @@ NIL
 NIL
 
 SLIDER
-25
-136
-117
-169
+26
+204
+118
+237
 allies
 allies
 0
@@ -387,10 +431,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-125
-136
-217
-169
+126
+204
+218
+237
 enemies
 enemies
 0
@@ -401,7 +445,59 @@ enemies
 NIL
 HORIZONTAL
 
+INPUTBOX
+23
+137
+219
+197
+map-file
+lobo-default-map.png
+1
+0
+String
+
+TEXTBOX
+22
+246
+257
+264
+---------------------------------
+11
+0.0
+1
+
 @#$#@#$#@
+LOBO
+----
+
+Lobo is Logo Bolo: a re-envisioning of the classic tank game by Stuart Cheshire in NetLogo. Below you will find a short tutorial on how to play, some known bugs and limitations, and credits.
+
+TUTORIAL
+-------
+
+...
+
+BUGS / LIMITATIONS
+------------------
+
+In the original Bolo, the map takes up many screen widths and is scrollable with the tank at the center. "follow" by itself wouldn't work, because NetLogo does not allow objects off-screen. I spent a while trying to figure this out, at one point essentially rewriting the rendering engine and using a table of "actual" patch coordinates that was translated into "virtual" patch coordinates each frame Ð not only was this very slow, but it was very overcomplicated and I wasn't able to do everything I had wanted. Instead, the map was made one screen size.
+
+In the original Bolo, patches are not merely colors - they have patterns on them (grass has little green lines, forests are spotted, roads have white stripes). This was not possible in NetLogo because patches can only have a single color.
+
+Time was also a limiting factor: I had planned a lot of additional features found in the original Bolo, like a nicer GUI for showing armor and ammunition, water as a ground-type (which drowns your tank). These were skipped so more work could be spent on general polishing and testing.
+
+CREDITS / MISC
+-------
+
+* Stuart Cheshire for the original Bolo game. Some graphics used in this project (tanks, pillboxes, and bases) were heavily based on old sprites taken from Bolo.
+
+* My dad for introducing me to Bolo many years ago, and for helping me simplify the original Bolo game into something possible with NetLogo.
+
+* Josh Hofing for advice on implementing certain features and emotional support.
+
+This project is available on GitHub at https://github.com/earwig/lobo. I used it for syncing code between my netbook and my desktop when working on the project away from home.
+
+Ñ Ben Kurtovic
 @#$#@#$#@
 default
 true
