@@ -3,6 +3,7 @@
 
 globals [
   player
+  player-death-time
   player-deaths
   player-has-target?
   player-kills
@@ -22,6 +23,18 @@ to spawn-player [tank-xcor tank-ycor tank-heading]
 end
 
 to do-player-logic
+  ifelse player = nobody [
+    if timer - player-death-time > 1.5 [
+      spawn-player 0 0 0
+    ]
+  ] [
+    ask player [
+      do-player-movement
+    ]
+  ]
+end
+
+to do-player-movement
   if mouse-inside? [
     if mouse-down? and not mouse-was-down? [
       let txcor round mouse-xcor
@@ -54,15 +67,29 @@ to do-player-logic
   ]
 end
 
-to player-place-pill
-  ask player [
-    place-pill
+to player-fire
+  if player != nobody [
+    ask player [
+      fire
+    ]
   ]
 end
 
-to cancel-order
-  if player-has-target? [
-    cancel-target
+to player-place-pill
+  if player != nobody [
+    ask player [
+      place-pill
+    ]
+  ]
+end
+
+to player-cancel-order
+  if player != nobody [
+    ask player [
+      if player-has-target? [
+        cancel-target
+      ]
+    ]
   ]
 end
 

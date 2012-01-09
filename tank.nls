@@ -123,6 +123,7 @@ end
 
 to kill-tank
   if is-player? [
+    set player-death-time timer
     set player-deaths player-deaths + 1
   ]
   if [is-shooter-player?] of myself [

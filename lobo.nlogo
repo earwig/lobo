@@ -48,11 +48,7 @@ to setup
 end
 
 to go
-  if player != nobody [
-    ask player [
-      do-player-logic
-    ]
-  ]
+  do-player-logic
   ask tanks [
     do-tank-logic
   ]
@@ -75,18 +71,6 @@ to go
   keep-time
 end
 
-to player-fire
-  ask player [
-    fire
-  ]
-end
-
-to player-cancel-order
-  ask player [
-    cancel-order
-  ]
-end
-
 ;; ================
 ;; Other procedures
 ;; ================
@@ -105,6 +89,7 @@ to setup-defaults
   set max-fps 30
   set mouse-was-down? false
   set sound-stopped? true
+  set player-death-time timer
   set player-deaths 0
   set player-has-target? false
   set player-kills 0
