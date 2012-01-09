@@ -19,9 +19,11 @@ extensions [
 ]
 
 globals [
+  last-sound-time
   last-tick-time
   max-fps
   mouse-was-down?
+  sound-stopped?
   sounds
 ]
 
@@ -43,7 +45,6 @@ to setup
   spawn-pillbox 6 6
   show-hud
   render
-  set last-tick-time timer
 end
 
 to go
@@ -67,6 +68,7 @@ to go
   ]
   show-crosshairs
   show-hud
+  stop-old-sounds
   render
   keep-time
 end
@@ -96,8 +98,11 @@ end
 to setup-defaults
   set-patch-size 20
   resize-world -17 17 -12 12
+  set last-sound-time timer
+  set last-tick-time timer
   set max-fps 30
   set mouse-was-down? false
+  set sound-stopped? true
   set player-deaths 0
   set player-has-target? false
   set player-kills 0
@@ -186,12 +191,25 @@ to keep-time
   set last-tick-time timer
 end
 
+to stop-old-sounds
+  ; NetLogo sometimes plays sounds for longer than we want
+  ; i.e., it doesn't know how to properly stop long sounds:
+  let time-since-last-sound timer - last-sound-time
+  if time-since-last-sound > 2 and not sound-stopped? [
+    debug -1 "SOUND-STOP" (word round time-since-last-sound " seconds since last")
+    sound:stop-music
+    set sound-stopped? true
+  ]
+end
+
 to play-sound [name]
   if enable-sound? [
     let dist distancexy ([xcor] of player) ([ycor] of player)
     let volume 100 - (dist * 4)
     if volume > 0 [
       sound:play-drum (table:get sounds name) volume
+      set last-sound-time timer
+      set sound-stopped? false
     ]
   ]
 end
