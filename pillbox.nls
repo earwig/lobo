@@ -43,6 +43,7 @@ to set-pill-vars [p-team]
   set color get-pill-color
   set shape (word "pillbox-alive-" armor)
   set size 1.1
+  setxy pxcor pycor
 end
 
 to do-pill-logic

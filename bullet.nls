@@ -57,7 +57,7 @@ to do-bullet-logic
   let shootable-pills-here pillboxes-here with [alive? = true]
   let targets (turtle-set tanks-here shootable-pills-here)
   if is-shooter-tank? [  ; Only tanks can shoot at bases
-    let shootable-bases-here bases-here with [armor > 0 and team != -1 and team != team-of-shooter]
+    let shootable-bases-here bases-here with [armor > 0 and team != -1 and team != [team-of-shooter] of myself]
     set targets (turtle-set targets shootable-bases-here)
   ]
   let target min-one-of targets [distancexy mxcor mycor]

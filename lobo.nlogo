@@ -5,6 +5,7 @@
 ;;
 
 __includes [
+  "ai.nls"
   "base.nls"
   "bullet.nls"
   "explosion.nls"
@@ -452,6 +453,17 @@ TEXTBOX
 0.0
 1
 
+MONITOR
+59
+466
+187
+511
+Current AI Routine
+[ai-objective] of one-of tanks with [not is-player?]
+17
+1
+11
+
 @#$#@#$#@
 LOBO
 ----
@@ -501,7 +513,9 @@ CREDITS / MISC
 
 * My dad for introducing me to Bolo many years ago, and for helping me simplify the original Bolo game into something possible with NetLogo.
 
-* Josh Hofing for advice on implementing certain features and emotional support.
+* Josh Hofing for advice on implementing certain features and positive encouragement.
+
+* Chain Algorithm - I wrote the entire AI routine in less than an hour immediately before the project was due (ha!), and I don't think it would be possible if I hadn't been listening to your music on loop the entire time. Really gets your blood pumping, y'know? Yeah.
 
 This project is available on GitHub at https://github.com/earwig/lobo. I used it for syncing code between my netbook and my desktop when working on the project away from home.
 

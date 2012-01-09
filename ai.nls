@@ -1,0 +1,149 @@
+;; lobo: Logo Bolo
+;; (c) Ben Kurtovic, 2011-2012
+
+to ai-do-cycle
+  if ai-objective = "nothing" [
+    set ai-objective ai-get-objective
+  ]
+  if ai-objective = "base-run" [
+    ai-do-base-run
+  ]
+  if ai-objective = "place-pill" [
+    ai-do-place-pill
+  ]
+  if ai-objective = "refuel" [
+    ai-do-refuel
+  ]
+  if ai-objective = "capture-pill" [
+    ai-do-capture-pill
+  ]
+  if ai-objective = "capture-base" [
+    ai-do-capture-base
+  ]
+  if ai-objective = "attack-player" [
+    ai-do-attack-player
+  ]
+end
+
+to-report ai-get-objective
+  if any? bases with [team = -1] [
+    report "base-run"
+   ]
+  if number-of-pills > 0 [
+    report "place-pill"
+  ]
+  if any? pillboxes with [team != 1] and ammunition > 4 and armor > 6 [
+    report "capture-pill"
+  ]
+  if any? bases with [team = 0] and ammunition > (max-ammo / 2) and armor > 2 [
+    report "capture-base"
+  ]
+  if player != nobody and ammunition > (max-ammo / 2) and armor > 2 [
+    report "attack-player"
+  ]
+  if any? bases with [team = 1] and (ammunition < max-ammo or armor < max-armor) [
+    report "refuel"
+  ]
+  if player != nobody [
+    report "attack-player"
+  ]
+  report "nothing"
+end
+
+to ai-do-base-run
+  let mxcor xcor
+  let mycor ycor
+  let target min-one-of (bases with [team = -1]) [distancexy mxcor mycor]
+  let dist ai-approach-target target 0.1
+  if dist < 0.1 [
+    set ai-objective "nothing"
+  ]
+end
+
+to ai-do-place-pill
+  let mxcor xcor
+  let mycor ycor
+  let target min-one-of bases [distancexy mxcor mycor]
+  let dist ai-approach-target target 1
+  if dist < 2 [
+    place-pill
+  ]
+  set ai-objective "nothing"
+end
+
+to ai-do-refuel
+  let mxcor xcor
+  let mycor ycor
+  let target min-one-of (bases with [team = 1]) [distancexy mxcor mycor]
+  let dist ai-approach-target target 0.1
+  if dist < 1 and ammunition > (max-ammo / 2) and armor > (max-armor / 2) [
+    set ai-objective "nothing"
+  ]
+end
+
+to ai-do-capture-pill
+  let mxcor xcor
+  let mycor ycor
+  let target min-one-of (pillboxes with [team != 1]) [distancexy mxcor mycor]
+  let dist ai-approach-target target 2
+  ifelse number-of-pills > 0 or ammunition = 0 [
+    set ai-objective "nothing"
+  ] [
+    if dist < 5 and [armor] of target > 0 [
+      fire
+    ]
+    if [armor] of target = 0 [
+      set dist ai-approach-target target 0.1
+    ]
+  ]
+end
+
+to ai-do-capture-base
+  let mxcor xcor
+  let mycor ycor
+  let target min-one-of (bases with [team != 1]) [distancexy mxcor mycor]
+  let dist ai-approach-target target 2
+  ifelse target = nobody or ammunition = 0 [
+    set ai-objective "nothing"
+  ] [
+    if dist < 5 and [armor] of target > 0 [
+      fire
+    ]
+    if [armor] of target = 0 [
+      set dist ai-approach-target target 0.1
+    ]
+  ]
+end
+
+to ai-do-attack-player
+  let mxcor xcor
+  let mycor ycor
+  ifelse player = nobody [
+    set ai-objective "nothing"
+  ] [
+    let dist ai-approach-target player 1
+    if ammunition = 0 [
+      set ai-objective "nothing"
+    ]
+    if dist < 5 [
+      fire
+    ]
+  ]
+end
+
+to-report ai-approach-target [target min-dist]
+  if target != nobody [
+    tank-facexy ([xcor] of target) ([ycor] of target)
+    set is-accelerating? true
+    let dist distancexy ([xcor] of target) ([ycor] of target)
+    if dist < 2 and speed > 0.075 [
+      decelerate friction * 5
+    ]
+    if dist < min-dist [
+      set is-accelerating? false
+      set speed speed / 2
+    ]
+    report dist
+  ]
+  report 0
+end

@@ -19,6 +19,7 @@ tanks-own [
   number-of-pills
   speed
   team
+  ai-objective
 ]
 
 ;; ==========
@@ -47,6 +48,7 @@ to set-tank-vars [player? tteam theading]
   set number-of-pills 0
   set speed 0
   set team tteam
+  set ai-objective "nothing"
 
   set color get-tank-color
   set heading theading
@@ -55,6 +57,9 @@ to set-tank-vars [player? tteam theading]
 end
 
 to do-tank-logic
+  if not is-player? [
+    ai-do-cycle
+  ]
   if is-accelerating? [
     accelerate acceleration
   ]
@@ -146,6 +151,16 @@ to kill-tank
   ]
   ask max-one-of tanks [who] [  ; Tank that was just spawned
     play-sound "spawn"
+  ]
+  if number-of-pills > 0 [
+    ask patch ((3 - random 6) + xcor) ((3 - random 6) + ycor) [
+      spawn-pillbox
+      ask max-one-of pillboxes [who] [
+        set armor 0
+        set alive? false
+        set shape "pillbox-dead"
+      ]
+    ]
   ]
   die
 end
