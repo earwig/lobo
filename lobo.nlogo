@@ -1,5 +1,5 @@
 ;; lobo: Logo Bolo
-;; (c) Ben Kurtovic, 2011
+;; (c) Ben Kurtovic, 2011-2012
 ;;
 ;; Logo Bolo is a re-envisioning of the classic tank game by Stuart Cheshire in NetLogo.
 ;;
@@ -41,6 +41,7 @@ to setup
   spawn-tank 1 6 0 270
   spawn-base 0 -7
   spawn-pillbox 6 6
+  show-hud
   render
   set last-tick-time timer
 end
@@ -188,7 +189,7 @@ end
 to play-sound [name]
   if enable-sound? [
     let dist distancexy ([xcor] of player) ([ycor] of player)
-    let volume 127 - (dist * 8)
+    let volume 100 - (dist * 4)
     if volume > 0 [
       sound:play-drum (table:get sounds name) volume
     ]
@@ -353,49 +354,6 @@ NIL
 NIL
 
 @#$#@#$#@
-WHAT IS IT?
------------
-This section could give a general understanding of what the model is trying to show or explain.
-
-
-HOW IT WORKS
-------------
-This section could explain what rules the agents use to create the overall behavior of the model.
-
-
-HOW TO USE IT
--------------
-This section could explain how to use the model, including a description of each of the items in the interface tab.
-
-
-THINGS TO NOTICE
-----------------
-This section could give some ideas of things for the user to notice while running the model.
-
-
-THINGS TO TRY
--------------
-This section could give some ideas of things for the user to try to do (move sliders, switches, etc.) with the model.
-
-
-EXTENDING THE MODEL
--------------------
-This section could give some ideas of things to add or change in the procedures tab to make the model more complicated, detailed, accurate, etc.
-
-
-NETLOGO FEATURES
-----------------
-This section could point out any especially interesting or unusual features of NetLogo that the model makes use of, particularly in the Procedures tab.  It might also point out places where workarounds were needed because of missing features.
-
-
-RELATED MODELS
---------------
-This section could give the names of models in the NetLogo Models Library or elsewhere which are of related interest.
-
-
-CREDITS AND REFERENCES
-----------------------
-This section could contain a reference to the model's URL on the web if it has one, as well as any other necessary credits or references.
 @#$#@#$#@
 default
 true

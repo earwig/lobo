@@ -1,5 +1,5 @@
 ;; lobo: Logo Bolo
-;; (c) Ben Kurtovic, 2011
+;; (c) Ben Kurtovic, 2011-2012
 
 breed [tanks tank]
 
@@ -129,6 +129,16 @@ to kill-tank
       set player-kills player-kills + 1
     ]
   die
+end
+
+to place-pill
+  ifelse number-of-pills > 0 and count bases-here = 0 [
+    set number-of-pills number-of-pills - 1
+    hatch-pillbox
+    play-sound "place"
+  ] [
+    play-sound "nopill"
+  ]
 end
 
 ;; =========

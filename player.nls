@@ -1,5 +1,5 @@
 ;; lobo: Logo Bolo
-;; (c) Ben Kurtovic, 2011
+;; (c) Ben Kurtovic, 2011-2012
 
 globals [
   player
@@ -56,13 +56,7 @@ end
 
 to player-place-pill
   ask player [
-    ifelse number-of-pills > 0 [
-      set number-of-pills number-of-pills - 1
-      hatch-pillbox
-      play-sound "place"
-    ] [
-      play-sound "nopill"
-    ]
+    place-pill
   ]
 end
 

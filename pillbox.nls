@@ -1,5 +1,5 @@
 ;; lobo: Logo Bolo
-;; (c) Ben Kurtovic, 2011
+;; (c) Ben Kurtovic, 2011-2012
 
 breed [pillboxes pillbox]
 
@@ -26,7 +26,7 @@ end
 
 to hatch-pillbox
   hatch 1 [
-    debug who "PILL-HATCH" (word "by " ([who] of myself))
+    debug who "PILL-PLACE" (word "by " ([who] of myself))
     set breed pillboxes
     set-pill-vars [team] of myself
   ]

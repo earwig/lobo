@@ -1,5 +1,5 @@
 ;; lobo: Logo Bolo
-;; (c) Ben Kurtovic, 2011
+;; (c) Ben Kurtovic, 2011-2012
 
 breed [bullets bullet]
 
