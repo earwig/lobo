@@ -48,7 +48,7 @@ end
 to do-pill-logic
   ifelse alive? [
     if timer - last-fire-time > anger [
-      let targets tanks with [team != [team] of myself] in-radius 6
+      let targets tanks with [team != [team] of myself] in-radius 7
       if any? targets [
         pill-fire-at min-one-of targets [distancexy [xcor] of myself [ycor] of myself]
       ]
@@ -65,7 +65,7 @@ to pill-fire-at [target]
   debug who "PILL-FIRE" (word "at " [who] of target)
   face target
   play-sound "fire"
-  fire-bullet 6
+  fire-bullet 7
   set last-fire-time timer
 end
 

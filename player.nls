@@ -3,7 +3,6 @@
 
 globals [
   player
-  player-death-time
   player-deaths
   player-has-target?
   player-kills
@@ -15,22 +14,15 @@ globals [
 ;; Procedures
 ;; ==========
 
-to spawn-player [tank-xcor tank-ycor tank-heading]
-  create-tanks 1 [
+to spawn-player [tank-heading]
+  sprout-tanks 1 [
     set player tank who
-    set-tank-vars true 0 tank-xcor tank-ycor tank-heading
+    set-tank-vars true 0 tank-heading
   ]
 end
 
 to do-player-logic
-  ifelse player = nobody [
-    if timer - player-death-time > 1.5 [
-      spawn-player 0 0 0
-      ask player [
-        play-sound "spawn"
-      ]
-    ]
-  ] [
+  if player != nobody [
     ask player [
       do-player-movement
     ]

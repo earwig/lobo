@@ -70,7 +70,7 @@ to refuel-tank [tank-to-refuel]
   let time-since-last-refuel timer - last-refuel
   ask tank-to-refuel [
     ifelse armor < max-armor and ([armor] of myself) > 1 [
-      if time-since-last-refuel > 25 / max-fps [  ; 25 frames
+      if time-since-last-refuel > 20 / max-fps [  ; 20 frames
         set armor armor + 1
         ask myself [
           set armor armor - 1
@@ -79,7 +79,7 @@ to refuel-tank [tank-to-refuel]
       ]
     ] [
       if ammunition < max-ammo and ([ammunition] of myself) > 1 [
-        if time-since-last-refuel > 10 / max-fps [  ; 10 frames
+        if time-since-last-refuel > 8 / max-fps [  ; 8 frames
           set ammunition ammunition + 1
           ask myself [
             set ammunition ammunition - 1
@@ -95,11 +95,11 @@ to regenerate
   let time-since-last-ammo-regen timer - last-ammo-regen
   let time-since-last-armor-regen timer - last-armor-regen
 
-  if ammunition < max-ammo and time-since-last-ammo-regen > 6 [
+  if ammunition < max-ammo and time-since-last-ammo-regen > 4 [
     set ammunition ammunition + 1
     set last-ammo-regen timer
   ]
-  if armor < max-armor and time-since-last-armor-regen > 15 [
+  if armor < max-armor and time-since-last-armor-regen > 10 [
     set armor armor + 1
     set last-armor-regen timer 
   ]

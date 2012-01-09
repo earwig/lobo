@@ -24,6 +24,7 @@ globals [
   max-fps
   mouse-was-down?
   sound-stopped?
+  stop-game
   sounds
 ]
 
@@ -43,16 +44,18 @@ to setup
   make-sounds-table
   make-explosions-table
   load-map
-  spawn-player 0 0 0
-  ;spawn-tank 0 -6 0 90
-  ;spawn-tank 1 6 0 270
-  ;spawn-base 0 -7
-  ;spawn-pillbox 6 6
+  ask patch -3 0 [
+    spawn-player 270
+  ]
+  ask patch 2 0 [
+    spawn-tank 1 90
+  ]
   show-hud
   render
 end
 
 to go
+  set stop-game false
   do-player-logic
   ask tanks [
     do-tank-logic
@@ -68,6 +71,19 @@ to go
   ]
   ask explosions [
     keep-exploding
+  ]
+  if stop-game != false [
+    clear-drawing
+    clear-turtles
+    clear-patches
+    ask patch 0 2 [
+      set plabel first stop-game
+    ]
+    ask patch 0 0 [
+      set plabel last stop-game
+    ]
+    render
+    stop
   ]
   show-crosshairs
   show-hud
@@ -98,7 +114,7 @@ to setup-defaults
   set max-fps 30
   set mouse-was-down? false
   set sound-stopped? true
-  set player-death-time timer
+  set stop-game false
   set player-deaths 0
   set player-has-target? false
   set player-kills 0
@@ -286,9 +302,9 @@ frames
 
 BUTTON
 20
-270
+231
 115
-303
+264
 New Game
 setup
 NIL
@@ -302,9 +318,9 @@ NIL
 
 BUTTON
 130
-270
+231
 224
-303
+264
 Play Game
 go
 T
@@ -318,9 +334,9 @@ NIL
 
 BUTTON
 22
-335
+296
 225
-382
+343
 Fire!
 player-fire
 NIL
@@ -345,9 +361,9 @@ enable-sound?
 
 BUTTON
 23
-435
+396
 226
-468
+429
 Cancel Order
 player-cancel-order
 NIL
@@ -391,9 +407,9 @@ TEXTBOX
 
 TEXTBOX
 22
-312
+273
 263
-340
+301
 ---------------------------------
 11
 0.0
@@ -401,9 +417,9 @@ TEXTBOX
 
 BUTTON
 23
-392
+353
 226
-425
+386
 Place Pill
 player-place-pill
 NIL
@@ -414,36 +430,6 @@ NIL
 P
 NIL
 NIL
-
-SLIDER
-26
-204
-118
-237
-allies
-allies
-0
-6
-1
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-126
-204
-218
-237
-enemies
-enemies
-0
-6
-2
-1
-1
-NIL
-HORIZONTAL
 
 INPUTBOX
 23
@@ -458,9 +444,9 @@ String
 
 TEXTBOX
 22
-246
+207
 257
-264
+225
 ---------------------------------
 11
 0.0
@@ -473,9 +459,31 @@ LOBO
 Lobo is Logo Bolo: a re-envisioning of the classic tank game by Stuart Cheshire in NetLogo. Below you will find a short tutorial on how to play, some known bugs and limitations, and credits.
 
 TUTORIAL
--------
+--------
 
-...
+In Lobo, you control a tank and attempt to gain strategic control of the map by posessing all of the refueling bases, while simultaneously using your bullets and automated "pillboxes" as defensive or offensive weapons.
+
+You move your tank, which is black, by clicking anywhere on the playing field Ð you'll drive to that square and stop once you've reached it. If you change your mind and want to stop immediately, double-click anywhere on the map or press "C" (cancel order). The color of the tile represents the type of ground, which determines how fast you drive over it. You drive the fastest on road, which is black; light green grass gives you a medium speed; dark green forest makes you move slowest.
+
+When you start, you'll have a bit of ammunition and full armor. Fire your gun straight by pressing "F", lowering your ammo count by one. Getting shot by another tank or a pillbox will lower your armor count by one, and if that reaches zero, you'll die and respawn randomly. (Both of these counts are displayed on the top-left of the screen.)
+
+The map contains a few bases, which look like yellow squares. At the start of the game, they are gray (neutral) and any tank can claim one by driving over it. If you own a particular base, stopping over it will refuel your tank with ammo and armor. An base you don't own won't refuel you, but you can repeatedly shoot at it to weaken it, then drive over it to "capture" it.
+
+The map also contains a few pillboxes, or "pills", which look like gray circles with colored rectanges sticking out of them. Pills will automatically shoot at their nearest target within range, and they have infinite ammo, but not infinite armor. Destroy an enemy pill (red) and pick it up by driving over it, then place it below you, anywhere on the map, with "P". It'll be green, and will shoot at your enemies instead of you!
+
+You win the game by controlling all refueling bases on the map and then destroying your rival tanks Ð tanks that don't control any bases don't respawn!
+
+ADVANCED TIPS
+-------------
+* Refueling bases have limited reserves of armor and ammo, which regenerate slowly over time. In particular, shooting at a base lowers its armor reserves, and it is "destroyed" when its armor count reaches zero. Therefore, trying to refuel yourself on a recently captured base might not help that much!
+
+* At the start of the game, try your hardest to ignore the enemy tanks and pills and go straight for bases Ð controlling bases is the most important strategic element, after all.
+
+* To protect your bases from enemy attack, try placing pillboxes directly adjacent to them.
+
+* Pillboxes have "anger" Ð they'll shoot faster if you shoot at them, but they'll calm down over time. In other words, it might not be the best idea to take down an entire pillbox in one go, but hurt it and then come back later.
+
+* Consider shooting your own pillboxes if an enemy is nearby Ð you'll "anger" it, and it will shoot at your opponent faster! Also, don't hesitate to destroy your own pills completely and re-place them in a better location, or even in the same location with full health if they were damaged beforehand.
 
 BUGS / LIMITATIONS
 ------------------
@@ -484,10 +492,10 @@ In the original Bolo, the map takes up many screen widths and is scrollable with
 
 In the original Bolo, patches are not merely colors - they have patterns on them (grass has little green lines, forests are spotted, roads have white stripes). This was not possible in NetLogo because patches can only have a single color.
 
-Time was also a limiting factor: I had planned a lot of additional features found in the original Bolo, like a nicer GUI for showing armor and ammunition, water as a ground-type (which drowns your tank). These were skipped so more work could be spent on general polishing and testing.
+Time was also a limiting factor: I had planned a lot of additional features found in the original Bolo, like a nicer GUI for showing armor and ammunition, water as a ground-type (which drowns your tank), allies and multiple enemies (grr!), a nicer game-over screen, and a much, much smarter AI. These were skipped so more work could be spent on general polishing and testing.
 
 CREDITS / MISC
--------
+--------------
 
 * Stuart Cheshire for the original Bolo game. Some graphics used in this project (tanks, pillboxes, and bases) were heavily based on old sprites taken from Bolo.
 

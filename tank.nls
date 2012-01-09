@@ -25,13 +25,13 @@ tanks-own [
 ;; Procedures
 ;; ==========
 
-to spawn-tank [tank-team tank-xcor tank-ycor tank-heading]
-  create-tanks 1 [
-    set-tank-vars false tank-team tank-xcor tank-ycor tank-heading
+to spawn-tank [tank-team tank-heading]
+  sprout-tanks 1 [
+    set-tank-vars false tank-team tank-heading
   ]
 end
 
-to set-tank-vars [player? tteam txcor tycor theading]
+to set-tank-vars [player? tteam theading]
   set acceleration 0.03
   set ammunition 4
   set armor 8
@@ -52,7 +52,6 @@ to set-tank-vars [player? tteam txcor tycor theading]
   set heading theading
   set shape "tank"
   set size 1.5
-  setxy txcor tycor
 end
 
 to do-tank-logic
@@ -98,7 +97,7 @@ to fire
     ifelse ammunition > 0 [
       debug who "TANK-FIRE" (word (ammunition - 1) " left")
       set ammunition ammunition - 1
-      fire-bullet 5
+      fire-bullet 6
       play-sound "fire"
     ] [
       play-sound "noammo"
@@ -123,12 +122,31 @@ end
 
 to kill-tank
   if is-player? [
-    set player-death-time timer
     set player-deaths player-deaths + 1
   ]
   if [is-shooter-player?] of myself [
       set player-kills player-kills + 1
     ]
+  ifelse is-player? [
+    ifelse any? bases with [team = -1 or team = 0] [
+      ask patch (6 - random 12) (4 - random 8) [
+        spawn-player (random 360)
+      ]
+    ] [ 
+      set stop-game ["GAME OVER: PLAYER LOSES!" "Enemy controls all bases"]
+    ]
+  ] [
+    ifelse any? bases with [team = -1 or team = 1] [
+      ask patch (6 - random 12) (4 - random 8) [
+        spawn-tank ([team] of myself) (random 360)
+      ]
+    ] [
+      set stop-game ["GAME OVER: PLAYER WINS!" "Player controls all bases"]
+    ]
+  ]
+  ask max-one-of tanks [who] [  ; Tank that was just spawned
+    play-sound "spawn"
+  ]
   die
 end
 
