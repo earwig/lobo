@@ -48,8 +48,10 @@ to setup
 end
 
 to go
-  ask player [
-    do-player-logic
+  if player != nobody [
+    ask player [
+      do-player-logic
+    ]
   ]
   ask tanks [
     do-tank-logic
@@ -161,14 +163,24 @@ to draw-border [b-color b-thickness]
 end
 
 to show-hud
+  let player-armor 0
+  let player-ammo 0
+  let num-pills 0
+
+  if player != nobody [
+    set player-armor [armor] of player
+    set player-ammo [ammunition] of player
+    set num-pills [number-of-pills] of player
+  ]
+
   ask patch (max-pxcor - 1) (max-pycor - 1) [
-    set plabel (word "Armor: " [armor] of player)
+    set plabel (word "Armor: " player-armor)
   ]
   ask patch (max-pxcor - 1) (max-pycor - 2) [
-    set plabel (word "Ammo: " [ammunition] of player)
+    set plabel (word "Ammo: " player-ammo)
   ]
   ask patch (max-pxcor - 1) (max-pycor - 3) [
-    set plabel (word "Pillboxes: " [number-of-pills] of player)
+    set plabel (word "Pillboxes: " num-pills)
   ]
   ask patch (max-pxcor - 1) (min-pycor + 2) [
     set plabel (word "Deaths: " player-deaths)
@@ -204,7 +216,10 @@ end
 
 to play-sound [name]
   if enable-sound? [
-    let dist distancexy ([xcor] of player) ([ycor] of player)
+    let dist 0
+    if player != nobody [
+      set dist distancexy ([xcor] of player) ([ycor] of player)
+    ]
     let volume 100 - (dist * 4)
     if volume > 0 [
       sound:play-drum (table:get sounds name) volume
@@ -223,7 +238,7 @@ GRAPHICS-WINDOW
 12
 20.0
 1
-12
+14
 1
 1
 1
@@ -242,9 +257,9 @@ frames
 
 BUTTON
 19
-143
+179
 114
-176
+212
 New Game
 setup
 NIL
@@ -258,9 +273,9 @@ NIL
 
 BUTTON
 129
-143
+179
 223
-176
+212
 Play Game
 go
 T
@@ -274,9 +289,9 @@ NIL
 
 BUTTON
 21
-208
+244
 224
-255
+291
 Fire!
 player-fire
 NIL
@@ -301,9 +316,9 @@ enable-sound?
 
 BUTTON
 22
-308
+344
 225
-341
+377
 Cancel Order
 player-cancel-order
 NIL
@@ -347,9 +362,9 @@ TEXTBOX
 
 TEXTBOX
 21
-185
+221
 262
-213
+249
 ---------------------------------
 11
 0.0
@@ -357,9 +372,9 @@ TEXTBOX
 
 BUTTON
 22
-265
+301
 225
-298
+334
 Place Pill
 player-place-pill
 NIL
@@ -370,6 +385,36 @@ NIL
 P
 NIL
 NIL
+
+SLIDER
+25
+136
+117
+169
+allies
+allies
+0
+6
+1
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+125
+136
+217
+169
+enemies
+enemies
+0
+6
+2
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 @#$#@#$#@
@@ -446,7 +491,157 @@ false
 Circle -2674135 true false 2 2 295
 Circle -955883 true false 75 75 148
 
-pillbox-alive
+pillbox-alive-1
+false
+1
+Polygon -2674135 true true 270 240 270 270 240 270 180 210 210 180 270 240
+Rectangle -2674135 true true 225 135 300 165
+Rectangle -2674135 true true 135 0 165 75
+Rectangle -2674135 true true 0 135 75 165
+Rectangle -2674135 true true 135 225 165 300
+Polygon -2674135 true true 240 30 270 30 270 60 210 120 180 90 240 30
+Polygon -2674135 true true 30 60 30 30 60 30 120 90 90 120 30 60
+Polygon -2674135 true true 60 270 30 270 30 240 90 180 120 210 60 270
+Circle -7500403 true false 47 42 210
+Polygon -16777216 true false 117 90 87 136 100 198 102 149 111 121 145 95 129 78 122 95
+Polygon -16777216 true false 203 122 218 185 193 205 150 235 138 219 149 221 176 201 203 188 183 173 200 157 187 128 198 109
+Polygon -16777216 true false 116 183 126 216 143 210 129 207 123 182
+Polygon -16777216 true false 116 185 101 216 116 235 127 214
+Polygon -16777216 true false 154 67 188 61 218 99 192 86 178 144 179 86 158 66
+Polygon -16777216 true false 221 118 236 158 231 191 243 157
+Polygon -16777216 true false 105 120 135 90 150 120 123 146 110 181 97 157 112 105
+Polygon -16777216 true false 116 97 80 101 73 121 61 127 64 152 62 196 81 194 75 154 85 125 95 100
+Polygon -16777216 true false 152 224 182 234 212 216 230 196 211 202 191 218 187 206 160 223
+Polygon -16777216 true false 86 78 118 58 154 60 169 52 146 71 126 68 97 87 71 93 86 78
+Polygon -16777216 true false 218 107 248 139 245 184 230 192 224 154 225 126 214 109
+Polygon -16777216 true false 75 90 120 60 195 60 227 123 232 177 202 178 198 105 156 74 84 99 57 133 73 83
+Polygon -16777216 true false 77 147 124 213 176 210 222 179 167 171 137 191 105 141 67 117
+Polygon -16777216 true false 76 196 135 244 191 237 226 206 174 209 110 220 82 179 74 198
+Polygon -16777216 true false 101 67 154 52 175 134 135 94 92 95
+Polygon -16777216 true false 79 168 170 162 172 139 135 151 72 153
+Polygon -16777216 true false 207 80 249 119 166 172 160 128 208 83
+
+pillbox-alive-2
+false
+1
+Polygon -2674135 true true 270 240 270 270 240 270 180 210 210 180 270 240
+Rectangle -2674135 true true 225 135 300 165
+Rectangle -2674135 true true 135 0 165 75
+Rectangle -2674135 true true 0 135 75 165
+Rectangle -2674135 true true 135 225 165 300
+Polygon -2674135 true true 240 30 270 30 270 60 210 120 180 90 240 30
+Polygon -2674135 true true 30 60 30 30 60 30 120 90 90 120 30 60
+Polygon -2674135 true true 60 270 30 270 30 240 90 180 120 210 60 270
+Circle -7500403 true false 47 42 210
+Polygon -16777216 true false 117 90 87 136 100 198 102 149 111 121 145 95 129 78 122 95
+Polygon -16777216 true false 203 122 218 185 193 205 150 235 138 219 149 221 176 201 203 188 183 173 200 157 187 128 198 109
+Polygon -16777216 true false 116 183 126 216 143 210 129 207 123 182
+Polygon -16777216 true false 116 185 101 216 116 235 127 214
+Polygon -16777216 true false 154 67 188 61 218 99 192 86 178 144 179 86 158 66
+Polygon -16777216 true false 221 118 236 158 231 191 243 157
+Polygon -16777216 true false 105 120 135 90 150 120 123 146 110 181 97 157 112 105
+Polygon -16777216 true false 116 97 80 101 73 121 61 127 64 152 62 196 81 194 75 154 85 125 95 100
+Polygon -16777216 true false 152 224 182 234 212 216 230 196 211 202 191 218 187 206 160 223
+Polygon -16777216 true false 86 78 118 58 154 60 169 52 146 71 126 68 97 87 71 93 86 78
+Polygon -16777216 true false 218 107 248 139 245 184 230 192 224 154 225 126 214 109
+Polygon -16777216 true false 75 90 120 60 195 60 227 123 232 177 202 178 198 105 156 74 84 99 57 133 73 83
+Polygon -16777216 true false 77 147 124 213 176 210 222 179 167 171 137 191 105 141 67 117
+Polygon -16777216 true false 76 196 135 244 191 237 226 206 174 209 110 220 82 179 74 198
+
+pillbox-alive-3
+false
+1
+Polygon -2674135 true true 270 240 270 270 240 270 180 210 210 180 270 240
+Rectangle -2674135 true true 225 135 300 165
+Rectangle -2674135 true true 135 0 165 75
+Rectangle -2674135 true true 0 135 75 165
+Rectangle -2674135 true true 135 225 165 300
+Polygon -2674135 true true 240 30 270 30 270 60 210 120 180 90 240 30
+Polygon -2674135 true true 30 60 30 30 60 30 120 90 90 120 30 60
+Polygon -2674135 true true 60 270 30 270 30 240 90 180 120 210 60 270
+Circle -7500403 true false 47 42 210
+Polygon -16777216 true false 117 90 87 136 100 198 102 149 111 121 145 95 129 78 122 95
+Polygon -16777216 true false 203 122 218 185 193 205 150 235 138 219 149 221 176 201 203 188 183 173 200 157 187 128 198 109
+Polygon -16777216 true false 116 183 126 216 143 210 129 207 123 182
+Polygon -16777216 true false 116 185 101 216 116 235 127 214
+Polygon -16777216 true false 154 67 188 61 218 99 192 86 178 144 179 86 158 66
+Polygon -16777216 true false 221 118 236 158 231 191 243 157
+Polygon -16777216 true false 105 120 135 90 150 120 123 146 110 181 97 157 112 105
+Polygon -16777216 true false 116 97 80 101 73 121 61 127 64 152 62 196 81 194 75 154 85 125 95 100
+Polygon -16777216 true false 152 224 182 234 212 216 230 196 211 202 191 218 187 206 160 223
+Polygon -16777216 true false 86 78 118 58 154 60 169 52 146 71 126 68 97 87 71 93 86 78
+Polygon -16777216 true false 218 107 248 139 245 184 230 192 224 154 225 126 214 109
+
+pillbox-alive-4
+false
+1
+Polygon -2674135 true true 270 240 270 270 240 270 180 210 210 180 270 240
+Rectangle -2674135 true true 225 135 300 165
+Rectangle -2674135 true true 135 0 165 75
+Rectangle -2674135 true true 0 135 75 165
+Rectangle -2674135 true true 135 225 165 300
+Polygon -2674135 true true 240 30 270 30 270 60 210 120 180 90 240 30
+Polygon -2674135 true true 30 60 30 30 60 30 120 90 90 120 30 60
+Polygon -2674135 true true 60 270 30 270 30 240 90 180 120 210 60 270
+Circle -7500403 true false 47 42 210
+Polygon -16777216 true false 117 90 87 136 100 198 102 149 111 121 145 95 129 78 122 95
+Polygon -16777216 true false 203 122 218 185 193 205 150 235 138 219 149 221 176 201 203 188 183 173 200 157 187 128 198 109
+Polygon -16777216 true false 116 183 126 216 143 210 129 207 123 182
+Polygon -16777216 true false 116 185 101 216 116 235 127 214
+Polygon -16777216 true false 154 67 188 61 218 99 192 86 178 144 179 86 158 66
+Polygon -16777216 true false 221 118 236 158 231 191 243 157
+Polygon -16777216 true false 105 120 135 90 150 120 123 146 110 181 97 157 112 105
+Polygon -16777216 true false 116 97 80 101 73 121 61 127 64 152 62 196 81 194 75 154 85 125 95 100
+
+pillbox-alive-5
+false
+1
+Polygon -2674135 true true 270 240 270 270 240 270 180 210 210 180 270 240
+Rectangle -2674135 true true 225 135 300 165
+Rectangle -2674135 true true 135 0 165 75
+Rectangle -2674135 true true 0 135 75 165
+Rectangle -2674135 true true 135 225 165 300
+Polygon -2674135 true true 240 30 270 30 270 60 210 120 180 90 240 30
+Polygon -2674135 true true 30 60 30 30 60 30 120 90 90 120 30 60
+Polygon -2674135 true true 60 270 30 270 30 240 90 180 120 210 60 270
+Circle -7500403 true false 45 45 210
+Polygon -16777216 true false 117 90 87 136 100 198 102 149 111 121 145 95 129 78 122 95
+Polygon -16777216 true false 203 122 218 185 193 205 150 235 138 219 149 221 176 201 203 188 183 173 200 157 187 128 198 109
+Polygon -16777216 true false 116 183 126 216 143 210 129 207 123 182
+Polygon -16777216 true false 116 185 101 216 116 235 127 214
+Polygon -16777216 true false 154 67 188 61 218 99 192 86 178 144 179 86 158 66
+
+pillbox-alive-6
+false
+1
+Polygon -2674135 true true 270 240 270 270 240 270 180 210 210 180 270 240
+Rectangle -2674135 true true 225 135 300 165
+Rectangle -2674135 true true 135 0 165 75
+Rectangle -2674135 true true 0 135 75 165
+Rectangle -2674135 true true 135 225 165 300
+Polygon -2674135 true true 240 30 270 30 270 60 210 120 180 90 240 30
+Polygon -2674135 true true 30 60 30 30 60 30 120 90 90 120 30 60
+Polygon -2674135 true true 60 270 30 270 30 240 90 180 120 210 60 270
+Circle -7500403 true false 45 45 210
+Polygon -16777216 true false 117 90 87 136 100 198 102 149 111 121 145 95 129 78 122 95
+Polygon -16777216 true false 203 122 218 185 193 205 150 235 138 219 149 221 176 201 203 188 183 173 200 157 187 128 198 109
+Polygon -16777216 true false 116 183 126 216 143 210 129 207 123 182
+
+pillbox-alive-7
+false
+1
+Polygon -2674135 true true 270 240 270 270 240 270 180 210 210 180 270 240
+Rectangle -2674135 true true 225 135 300 165
+Rectangle -2674135 true true 135 0 165 75
+Rectangle -2674135 true true 0 135 75 165
+Rectangle -2674135 true true 135 225 165 300
+Polygon -2674135 true true 240 30 270 30 270 60 210 120 180 90 240 30
+Polygon -2674135 true true 30 60 30 30 60 30 120 90 90 120 30 60
+Polygon -2674135 true true 60 270 30 270 30 240 90 180 120 210 60 270
+Circle -7500403 true false 45 45 210
+Polygon -16777216 true false 117 90 87 136 100 198 102 149 111 121 145 95 129 78 122 95
+
+pillbox-alive-8
 false
 1
 Polygon -2674135 true true 270 240 270 270 240 270 180 210 210 180 270 240

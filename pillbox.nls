@@ -42,12 +42,11 @@ to set-pill-vars [p-team]
   set team p-team
 
   set color get-pill-color
-  set shape "pillbox-alive"
+  set shape (word "pillbox-alive-" armor)
   set size 1.1
 end
 
 to do-pill-logic
-  set label armor
   ifelse alive? [
     if timer - last-fire-time > anger [
       let targets tanks with [team != [team] of myself] in-radius 9
@@ -83,6 +82,7 @@ to pill-shot-at
     debug who "PILL-SHOT" (word "by " ([shooter] of myself))
     explode "medium"
     play-sound "shot"
+    set shape (word "pillbox-alive-" armor)
     enrage
   ]
 end
