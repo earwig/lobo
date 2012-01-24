@@ -152,8 +152,11 @@ to kill-tank
   ask max-one-of tanks [who] [  ; Tank that was just spawned
     play-sound "spawn"
   ]
-  if number-of-pills > 0 [
-    ask patch ((3 - random 6) + xcor) ((3 - random 6) + ycor) [
+
+  while [number-of-pills > 0] [
+    let mpxcor pxcor
+    let mpycor pycor
+    ask one-of patches with [(count pillboxes-here) = 0 and pxcor <= (mpxcor + 2) and pxcor >= (mpxcor - 2) and pycor <= (mpycor + 2) and pycor >= (mpycor - 2)] [
       spawn-pillbox
       ask max-one-of pillboxes [who] [
         set armor 0
@@ -161,6 +164,7 @@ to kill-tank
         set shape "pillbox-dead"
       ]
     ]
+    set number-of-pills number-of-pills - 1
   ]
   die
 end
